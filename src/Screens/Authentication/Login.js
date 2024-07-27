@@ -6,10 +6,18 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import {HEIGHT, Poppins_Regular, WIDTH} from '../../Config/appConst';
+import {
+  HEIGHT,
+  Poppins_Medium,
+  Poppins_Regular,
+  WIDTH,
+} from '../../Config/appConst';
 import COLOR from '../../Config/color.json';
 import {useNavigation} from '@react-navigation/native';
-import CustomBtn from '../../Components/CustomBtn/CustomButton';
+import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
+import ApiManager from '../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Snackbar from 'react-native-snackbar';
 
 const Login = () => {
   const navigation = useNavigation();
@@ -21,9 +29,9 @@ const Login = () => {
 
   const inputOnChange = text => {
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var isEmailValid = emailRegex.test(inputValue);
+    var isEmailValid = emailRegex.test(userName);
     var phoneRegex = /^[6-9]\d{9}$/;
-    var isValidNumber = phoneRegex.test(inputValue);
+    var isValidNumber = phoneRegex.test(userName);
 
     let validate = isEmailValid || isValidNumber;
     if (!validate) {
@@ -38,7 +46,7 @@ const Login = () => {
   };
 
   const validationFunction = () => {
-    if (inputValue.length > 0 && isInvalidInput == true) {
+    if (userName.length > 0 && isInvalidInput == true) {
       setError(true);
     }
   };
@@ -48,8 +56,38 @@ const Login = () => {
     setPassword(formattedInpt);
   };
 
+  const signInFunction = () => {
+    SignInAPI();
+  };
+
+  const SignInAPI = () => {
+    const params = {
+      users_email: userName,
+      user_password: password,
+    };
+
+    ApiManager.userLogin(params)
+      .then(res => {
+        if (res?.data?.status == 200) {
+          const userData = JSON.stringify(res?.data);
+          console.log('login', userData);
+          AsyncStorage.setItem('userData', userData);
+          navigation.navigate('Dashboard');
+        } else {
+          Snackbar.show({
+            text: 'Invalid Credential',
+            backgroundColor: '#D1264A',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      })
+      .catch(error => console.error(error));
+  };
+
   return (
     <View style={styles.container}>
+      <Text style={styles.signInTxt}>SignIn</Text>
+
       <View>
         <Text style={styles.subTitle}>Email / Mobile Number</Text>
         <View>
@@ -75,8 +113,8 @@ const Login = () => {
         </View>
       </View>
 
-      <View>
-        <CustomBtn name="Signin" />
+      <View style={{marginTop: HEIGHT(4)}}>
+        <CustomBtn1 name="Signin" onPress={() => signInFunction()} />
       </View>
 
       <TouchableOpacity
@@ -89,13 +127,13 @@ const Login = () => {
         <Text style={{color: COLOR.Gray, fontSize: 16}}>--- Or ---</Text>
       </View>
 
-      <View style={{alignItems: 'center'}}>
+      <View style={styles.accountText}>
         <Text style={[styles.forgot, {color: COLOR.Black}]}>
           Don't have an account?
-          <TouchableOpacity onPress={() => navigation.navigate('signup')}>
-            <Text style={styles.forgot}>Register</Text>
-          </TouchableOpacity>
         </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('signup')}>
+          <Text style={styles.forgot}>Register</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -120,7 +158,7 @@ const styles = StyleSheet.create({
     marginTop: HEIGHT(1),
     marginBottom: HEIGHT(2),
     paddingLeft: WIDTH(4),
-    height: HEIGHT(9),
+    height: 48,
     borderRadius: 12,
     fontSize: 14,
     borderWidth: 1,
@@ -139,7 +177,20 @@ const styles = StyleSheet.create({
   orText: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: HEIGHT(5),
-    marginBottom: HEIGHT(3),
+    marginTop: HEIGHT(3),
+    marginBottom: HEIGHT(1),
+  },
+
+  accountText: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  signInTxt: {
+    fontFamily: Poppins_Medium,
+    fontSize: 20,
+    marginVertical: HEIGHT(3),
   },
 });

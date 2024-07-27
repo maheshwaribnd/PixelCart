@@ -6,12 +6,17 @@ import Login from '../Screens/Authentication/Login';
 import Signup from '../Screens/Authentication/Signup';
 import Forgot from '../Screens/Authentication/Forgot';
 import AppDashboard from '../Screens/MainScreens/Home/HomeScreen';
-import CategoryScreen from '../Screens/Category/CategoryScreen';
 import BottomNavigation from './BottomNavigation';
 import HomeScreen from '../Screens/MainScreens/Home/HomeScreen';
 import ProductCartDetails from '../Screens/ProductCartDetails/ProductCartDetails';
 import TrackScreen from '../Screens/TrackOrderScreen/TrackScreen';
 import ReviewScreen from '../Screens/ReviewScreen/ReviewScreen';
+import AddressScreen from '../Screens/Address/AddressScreen';
+import ParticularCategory from '../Screens/ParticularCategory/ParticularCategory';
+import NewPassword from '../Screens/Authentication/NewPassword';
+import Splash from '../Screens/Splash/Splash';
+import RecentSearchScreen from '../Screens/RecentSearchScreen/RecentSearchScreen';
+import EditProfile from '../Screens/MainScreens/Profile/EditProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,14 +24,22 @@ const StackNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {/* <Stack.Screen name='splash' component={Splash}/> */}
-        {/* <Stack.Screen name="login" component={Login} /> */}
-        {/* <Stack.Screen name="signup" component={Signup} /> */}
-        {/* <Stack.Screen name="forgot" component={Forgot} /> */}
-      <Stack.Screen name="Dashboard" component={BottomNavigation} />
+        <Stack.Screen name="splash" component={Splash} />
+        <Stack.Screen name="login" component={Login} />
+        <Stack.Screen name="signup" component={Signup} />
+        <Stack.Screen name="forgot" component={Forgot} />
+        <Stack.Screen name="newpassword" component={NewPassword} />
+        <Stack.Screen name="recentsearch" component={RecentSearchScreen} />
+        <Stack.Screen name="Dashboard" component={BottomNavigation} />
+        <Stack.Screen
+          name="particularcategory"
+          component={ParticularCategory}
+        />
         <Stack.Screen name="productcartdetail" component={ProductCartDetails} />
         <Stack.Screen name="trackscreen" component={TrackScreen} />
-        {/* <Stack.Screen name="reviewscreen" component={ReviewScreen} /> */}
+        <Stack.Screen name="reviewscreen" component={ReviewScreen} />
+        <Stack.Screen name="address" component={AddressScreen} />
+        <Stack.Screen name="editprofile" component={EditProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

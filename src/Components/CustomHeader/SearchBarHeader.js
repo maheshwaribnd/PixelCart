@@ -1,21 +1,57 @@
 import {StyleSheet, Text, TextInput, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import COLOR from '../../Config/color.json';
 import {HEIGHT, Poppins_Regular, WIDTH} from '../../Config/appConst';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
+import {useNavigation} from '@react-navigation/native';
+import ApiManager from '../../API/Api';
 
-const SearchBarHeader = ({name, search, setSearch}) => {
+const SearchBarHeader = () => {
+  const navigation = useNavigation();
+
+  const [allProductListResponse, setAllProductListResponse] = useState([]);
+  const [filterProducts, setFilteredProducts] = useState([]);
+  const [search, setSearch] = useState('');
+
+  // For All products List
+
+  useEffect(() => {
+    AllProductList();
+  }, []);
+
+  const AllProductList = () => {
+    ApiManager.allProducts()
+      .then(res => {
+        const response = res?.data?.Product_description;
+        setAllProductListResponse(response);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const filteredSearch = text => {
+    setSearch(text);
+
+    const filterdData = allProductListResponse.filter(item =>
+      item.products_name.toLowerCase().includes(text.toLowerCase()),
+    );
+    setFilteredProducts(filterdData);
+
+    navigation.navigate('recentsearch', {filterProducts: filterProducts});
+  };
+
   return (
     <View style={styles.headerView}>
       <View>
         <Text>Hello,</Text>
-        <Text style={styles.headerName}>{name}</Text>
+        <Text style={styles.headerName}>Mahi</Text>
       </View>
       <View style={styles.searchbar}>
         <TextInput
           value={search}
-          onChangeText={setSearch}
+          onChangeText={() => filteredSearch()}
           style={styles.searchInput}
         />
         <Feather

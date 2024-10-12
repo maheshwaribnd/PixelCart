@@ -38,6 +38,7 @@ export const styles = StyleSheet.create({
   total: {
     fontFamily: Poppins_Medium,
     fontSize: 16,
+    color: COLOR.Gray,
   },
 
   name: {
@@ -80,17 +81,23 @@ export const styles = StyleSheet.create({
 
   qty: {
     backgroundColor: COLOR.BtnColor,
-    borderRadius: 6,
     height: 32,
     width: 32,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
-    marginHorizontal: 12,
     borderColor: COLOR.LightGrey,
     elevation: 5,
     fontFamily: Poppins_Medium,
     fontSize: 16,
+  },
+
+  quantityCount: {
+    backgroundColor: COLOR.BlueLightShade,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   removebtnContainer: {

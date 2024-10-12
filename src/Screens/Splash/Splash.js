@@ -18,7 +18,7 @@ const Splash = () => {
       } else {
         navigation.navigate('login');
       }
-    }, 2000);
+    }, 3000);
   };
 
   return (

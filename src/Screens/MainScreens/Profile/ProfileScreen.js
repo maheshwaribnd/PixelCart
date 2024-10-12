@@ -1,39 +1,58 @@
 import {Image, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {styles} from './style';
 import CustomHeader from '../../../Components/CustomHeader/CustomHeader';
 import COLOR from '../../../Config/color.json';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {Switch} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import CustomBtn1 from '../../../Components/CustomBtn/CustomBtn1';
 import {HEIGHT} from '../../../Config/appConst';
+import ApiManager from '../../../API/Api';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [isEnabled, setIsEnabled] = useState(false);
-  const [data, setData] = useState(false);
+  const [userData, setUserData] = useState([]);
 
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-  const SignOut = async () => {
-    // AsyncStorage.clear();
-    // navigation.navigate('login')
+  useEffect(() => {
+    UserProfileAPIFunction();
+  }, []);
+
+  const UserProfileAPIFunction = async () => {
     const userDetails = await AsyncStorage.getItem('userData');
-    console.log('Data', userDetails);
-    if (userDetails) {
-      setData(true);
-    }
-    // const data1 = JSON.parse(data)
+    const user = JSON.parse(userDetails);
+    const userId = user?.customer_id;
+
+    const params = {
+      user_id: userId,
+    };
+
+    ApiManager.userData(params)
+      .then(res => {
+        setUserData(res?.data);
+      })
+      .catch(err => {
+        console.log('err', err);
+      });
+  };
+
+  const SignOut = async () => {
+    AsyncStorage.clear();
+    navigation.navigate('login');
   };
 
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>
       <CustomHeader />
-      {data ? (
+      {userData ? (
         <View style={{flex: 1, justifyContent: 'center'}}>
           <View
             style={[
@@ -41,9 +60,9 @@ const ProfileScreen = () => {
               {flexDirection: 'row', justifyContent: 'space-between'},
             ]}>
             <View>
-              <Text style={styles.name}>Timmy D'souza</Text>
-              <Text style={styles.dec}>timmyD'souza@gmail.com</Text>
-              <Text style={styles.des}>+91 869745812</Text>
+              <Text style={styles.name}>{userData?.user_profile}</Text>
+              <Text style={styles.dec}>{userData?.users_email}</Text>
+              <Text style={styles.des}>{userData?.users_mob}</Text>
             </View>
             <Feather
               name="edit"
@@ -54,19 +73,23 @@ const ProfileScreen = () => {
           </View>
 
           <View style={styles.cartBox}>
-            <View style={styles.optionsStyle}>
-              <MaterialIcons name="logout" size={24} color={COLOR.BtnColor} />
+            <TouchableOpacity
+              onPress={() => navigation.navigate('orderlist')}
+              style={styles.optionsStyle}>
+              <FontAwesome name="reorder" size={24} color={COLOR.BtnColor} />
               <Text style={[styles.dec, {color: COLOR.Black}]}>Your order</Text>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.optionsStyle}>
+            {/* <TouchableOpacity
+              onPress={() => navigation.navigate('newpassword')}
+              style={styles.optionsStyle}>
               <Ionicons name="key-outline" size={24} color={COLOR.BtnColor} />
               <Text style={[styles.dec, {color: COLOR.Black}]}>
                 Change password
               </Text>
-            </View>
+            </TouchableOpacity> */}
 
-            <View
+            <TouchableOpacity
               style={[styles.optionsStyle, {justifyContent: 'space-between'}]}>
               <View
                 style={{flexDirection: 'row', alignItems: 'center', gap: 7}}>
@@ -88,9 +111,9 @@ const ProfileScreen = () => {
                 onValueChange={toggleSwitch}
                 value={isEnabled}
               />
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.optionsStyle}>
+            {/* <TouchableOpacity style={styles.optionsStyle}>
               <Ionicons
                 name="help-circle-outline"
                 size={24}
@@ -99,19 +122,19 @@ const ProfileScreen = () => {
               <Text style={[styles.dec, {color: COLOR.Black}]}>
                 Help center
               </Text>
-            </View>
+            </TouchableOpacity> */}
 
-            <View style={styles.optionsStyle}>
+            {/* <TouchableOpacity style={styles.optionsStyle}>
               <MaterialIcons name="logout" size={20} color={COLOR.BtnColor} />
               <Text style={[styles.dec, {color: COLOR.Black}]}>
                 Terms & policy
               </Text>
-            </View>
+            </TouchableOpacity> */}
 
-            <View style={styles.optionsStyle}>
-              <MaterialIcons name="logout" size={24} color={COLOR.BtnColor} />
+            <TouchableOpacity style={styles.optionsStyle}>
+              <AntDesign name="exclamation" size={24} color={COLOR.BtnColor} />
               <Text style={[styles.dec, {color: COLOR.Black}]}>About us</Text>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => SignOut()}

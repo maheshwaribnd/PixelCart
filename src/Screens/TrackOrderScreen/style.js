@@ -4,6 +4,7 @@ import COLOR from '../../Config/color.json';
 
 export const styles = StyleSheet.create({
   cartBox: {
+    flex: 1,
     justifyContent: 'center',
     // alignItems: 'center',
     padding: HEIGHT(2),

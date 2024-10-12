@@ -32,6 +32,8 @@ export const styles = StyleSheet.create({
   name: {
     fontFamily: Poppins_Regular,
     color: COLOR.Black,
+    width: WIDTH(27),
+    textAlign: 'center',
   },
 
   subtitle: {
@@ -72,7 +74,6 @@ export const styles = StyleSheet.create({
   },
 
   listView: {
-    justifyContent: 'center',
     alignItems: 'center',
     gap: 3,
     marginHorizontal: WIDTH(1.1),
@@ -83,7 +84,7 @@ export const styles = StyleSheet.create({
     height: 64,
     width: 64,
     borderWidth: 0.5,
-    borderRadius: 12,
+    borderRadius: 50,
   },
 
   catlistView: {

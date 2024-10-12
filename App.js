@@ -1,11 +1,12 @@
-import {PaperProvider} from 'react-native-paper';
+import {Provider} from 'react-redux';
 import Index from './src';
+import store from './src/Redux/Store/Store';
 
 const App = () => {
   return (
-    <PaperProvider>
+    <Provider store={store}>
       <Index />
-    </PaperProvider>
+    </Provider>
   );
 };
 

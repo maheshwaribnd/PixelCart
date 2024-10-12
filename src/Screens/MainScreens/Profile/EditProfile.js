@@ -9,6 +9,8 @@ import {
   WIDTH,
 } from '../../../Config/appConst';
 import CustomBtn1 from '../../../Components/CustomBtn/CustomBtn1';
+import ApiManager from '../../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditProfile = () => {
   const navigation = useNavigation();
@@ -17,6 +19,29 @@ const EditProfile = () => {
   const [number, setNumber] = useState('');
   const [isInvalidInput, setisInvalidInput] = useState(false);
   const [error, setError] = useState(false);
+
+  const handleUpdate = async () => {
+    const userDetails = await AsyncStorage.getItem('userData');
+    const user = JSON.parse(userDetails);
+    const userId = user?.customer_id;
+
+    const params = {
+      user_id: userId,
+      user_name: name,
+      user_email: userEmail,
+      user_mobileno: number,
+    };
+
+    ApiManager.profileEdit(params)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          navigation.goBack();
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   const inputNameChange = text => {
     const formattedInpt = text.replace(/\s/g, '');
@@ -100,10 +125,7 @@ const EditProfile = () => {
       </View>
 
       <View style={{marginTop: HEIGHT(4)}}>
-        <CustomBtn1
-          name="Save Changes"
-          onPress={() => navigation.navigate('Dashboard')}
-        />
+        <CustomBtn1 name="Save Changes" onPress={() => handleUpdate()} />
       </View>
     </View>
   );

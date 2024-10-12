@@ -12,18 +12,22 @@ import ProductCartDetails from '../Screens/ProductCartDetails/ProductCartDetails
 import TrackScreen from '../Screens/TrackOrderScreen/TrackScreen';
 import ReviewScreen from '../Screens/ReviewScreen/ReviewScreen';
 import AddressScreen from '../Screens/Address/AddressScreen';
-import ParticularCategory from '../Screens/ParticularCategory/ParticularCategory';
+import SubCategory from '../Screens/SubCategory/SubCategory';
 import NewPassword from '../Screens/Authentication/NewPassword';
 import Splash from '../Screens/Splash/Splash';
-import RecentSearchScreen from '../Screens/RecentSearchScreen/RecentSearchScreen';
+import RecentSearchScreen from '../Components/RecentSearchScreen/RecentSearchScreen';
 import EditProfile from '../Screens/MainScreens/Profile/EditProfile';
+import CheckoutScreen from '../Screens/Checkout/CheckoutScreen';
+import OrderListingScreen from '../Screens/OrderListingScreen/OrderListingScreen';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Navigator
+        initialRouteName="splash"
+        screenOptions={{headerShown: false}}>
         <Stack.Screen name="splash" component={Splash} />
         <Stack.Screen name="login" component={Login} />
         <Stack.Screen name="signup" component={Signup} />
@@ -31,15 +35,17 @@ const StackNavigation = () => {
         <Stack.Screen name="newpassword" component={NewPassword} />
         <Stack.Screen name="recentsearch" component={RecentSearchScreen} />
         <Stack.Screen name="Dashboard" component={BottomNavigation} />
+        <Stack.Screen name="subcategory" component={SubCategory} />
+        <Stack.Screen name="checkout" component={CheckoutScreen} />
         <Stack.Screen
-          name="particularcategory"
-          component={ParticularCategory}
+          name="productcartdetails"
+          component={ProductCartDetails}
         />
-        <Stack.Screen name="productcartdetail" component={ProductCartDetails} />
         <Stack.Screen name="trackscreen" component={TrackScreen} />
         <Stack.Screen name="reviewscreen" component={ReviewScreen} />
         <Stack.Screen name="address" component={AddressScreen} />
         <Stack.Screen name="editprofile" component={EditProfile} />
+        <Stack.Screen name='orderlist' component={OrderListingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

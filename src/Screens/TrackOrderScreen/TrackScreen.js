@@ -1,5 +1,5 @@
 import {Image, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {styles} from './style';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
 import COLOR from '../../Config/color.json';
@@ -9,6 +9,42 @@ import CustomBtn2 from '../../Components/CustomBtn/CustomBtn2';
 
 const TrackScreen = () => {
   const navigation = useNavigation();
+  const [currentPosition, setCurrentPosition] = useState(0);
+
+  const data = [
+    {
+      label: 'Ordered Add Approved',
+      status: 'Your order has been placed',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Packed',
+      status: 'Your order has been packed',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Shipped',
+      status: 'Your order has been shipped',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Out For Delivery',
+      status: 'Your item is Out For Delivery',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Delivered',
+      status: 'Your order has been delivered',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+    // 'Order Summary'
+    // 'Payment Method'
+    // 'Track'
+  ];
 
   const labels = [
     'Cart',
@@ -41,14 +77,8 @@ const TrackScreen = () => {
     currentStepLabelColor: '#fe7013',
   };
 
-  // constructor() {
-  //     this.state = {
-  //         currentPosition: 0
-  //     }
-  // }
-
   return (
-    <View>
+    <View style={{flex: 1}}>
       <CustomHeader name="Track Order" />
       <View style={styles.cartBox}>
         <View style={styles.viewBox}>
@@ -64,11 +94,24 @@ const TrackScreen = () => {
           </View>
         </View>
 
-        <StepIndicator
-          customStyles={customStyles}
-          // currentPosition={this.state.currentPosition}
-          labels={labels}
-        />
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <StepIndicator
+            onPress={() => setCurrentPosition(currentPosition + 1)}
+            customStyles={customStyles}
+            currentPosition={currentPosition}
+            direction="vertical"
+            labels={labels}
+            renderLabel={({position, stepStatus, label, crntPosition}) => {
+              return (
+                <View>
+                  <Text>{data[position].label}</Text>
+                  <Text>{data[position].status}</Text>
+                  <Text>{data[position].dateTime}</Text>
+                </View>
+              );
+            }}
+          />
+        </View>
         <CustomBtn2
           name="Explore"
           onPress={() => navigation.navigate('home')}

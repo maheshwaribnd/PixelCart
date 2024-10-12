@@ -1,4 +1,10 @@
-import {StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import COLOR from '../../Config/color.json';
 import {
@@ -27,11 +33,11 @@ const Forgot = () => {
   const inputOnChange = text => {
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     var isEmailValid = emailRegex.test(userName);
-    // var phoneRegex = /^[6-9]\d{9}$/;
-    // var isValidNumber = phoneRegex.test(userName);
+    var phoneRegex = /^[6-9]\d{9}$/;
+    var isValidNumber = phoneRegex.test(userName);
 
-    // let validate = isEmailValid || isValidNumber;
-    if (!isEmailValid) {
+    let validate = isEmailValid || isValidNumber;
+    if (!validate) {
       setisInvalidInput(true);
     } else {
       setisInvalidInput(false);
@@ -56,7 +62,7 @@ const Forgot = () => {
     ApiManager.forgotPassword(params)
       .then(res => {
         if (res?.data?.status == 200) {
-          navigation.navigate('login');
+          navigation.navigate('newpassword');
         } else {
           Snackbar.show({
             text: 'Please enter email',

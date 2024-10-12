@@ -11,7 +11,7 @@ const constructApiRequest = (path, method, body) => ({
 const Axios = axios.create({
   baseURL: BASE_URL,
   timeout: 20000,
-})
+});
 
 const request = {
   get: path => Axios(constructApiRequest(path, 'get')),
@@ -25,15 +25,28 @@ const requestPath = {
   userLogin: 'login',
   userSignup: 'signUp',
   forgotPassword: 'forgotpassword',
+  // Post Profile
+  profileEdit: 'profileEdit',
+  //Post Review
+  postReview: 'store',
+  checkout: 'checkout',
 
-  //Get
+  //OrderListing
+  orderListing: 'myOrderListing',
+
+  //Get Products
   banner: 'banner',
   allProdudts: 'allProducts',
-  allCategories: 'allcategories',
+  allCategories: 'getCategories',
+  categoriesWiseProducts: 'subcategories',
   featureProduct: 'featuredProducts',
   bestSeller: 'BestSellers',
   trending: 'trendingproducts',
   dealsoftheday: 'deals-of-the-day',
+  // Get User
+  userData: 'getUser',
+  // Get Product Review
+  productReviews: 'index',
 };
 
 const ApiManager = {
@@ -48,6 +61,26 @@ const ApiManager = {
 
   forgotPassword: params => {
     return request.post(requestPath.forgotPassword, params);
+  },
+
+  userData: params => {
+    return request.post(requestPath.userData, params);
+  },
+
+  profileEdit: params => {
+    return request.post(requestPath.profileEdit, params);
+  },
+
+  postProductReview: params => {
+    return request.post(requestPath.postReview, params);
+  },
+
+  checkout: params => {
+    return request.post(requestPath.checkout, params);
+  },
+
+  orderListing: params => {
+    return request.post(requestPath.orderListing, params);
   },
 
   // Get API
@@ -77,6 +110,14 @@ const ApiManager = {
 
   dealsofthedayProducts: () => {
     return request.get(requestPath.dealsoftheday);
+  },
+
+  getCategoriesWiseProducts: catID => {
+    return request.get(`${requestPath.categoriesWiseProducts}/${catID}`);
+  },
+
+  getProductReviews: prodID => {
+    return request.get(`${requestPath.productReviews}/${prodID}`);
   },
 };
 

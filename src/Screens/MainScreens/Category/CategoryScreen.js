@@ -15,20 +15,19 @@ const CategoryScreen = () => {
     CategoryListAPI();
   }, []);
 
-  const CategoryListAPI = () => {
+  const CategoryListAPI = async () => {
     ApiManager.allCategories().then(res => {
-      if (res?.data?.status == 200) {
-        setcategoryResponse(res?.data);
-      }
+      const response = res?.data?.Categories;
+      setcategoryResponse(response);
     });
   };
 
   const RenderItemFunction = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('productcartdetail')}
+        onPress={() => navigation.navigate('subcategory', {catID: item?.id})}
         style={styles.imgWrap}>
-        <Image source={{uri: item?.img_name}} style={styles.image} />
+        <Image source={{uri: item?.icon}} style={styles.image} />
         <Text style={styles.name}>{item?.category}</Text>
       </TouchableOpacity>
     );

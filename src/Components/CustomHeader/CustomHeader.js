@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
     },
     elevation: 6,
     backgroundColor: COLOR.White,
+    shadowColor: COLOR.Black,
+    shadowOpacity: 0.1,
   },
 
   headerName: {

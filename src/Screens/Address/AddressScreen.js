@@ -5,12 +5,19 @@ import {styles} from './style';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
 import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
 import {Checkbox} from 'react-native-paper';
-import Snackbar from 'react-native-snackbar';
 import {useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {addAddress} from '../../Redux/Reducers/Address';
 
 const AddressScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const selectorforAmount = useSelector(state => state.addTotalAmount?.Amount)
 
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [mobileNo, setMobileNo] = useState('');
+  const [pincode, setPincode] = useState('');
   const [addNew, setAddNew] = useState(false);
   const [addressEmpty, setaddressEmpty] = useState(true);
   const [checked, setChecked] = useState(false);
@@ -23,13 +30,16 @@ const AddressScreen = () => {
   };
 
   const PurchasedFunction = () => {
-    return Snackbar.show({
-      text: 'Order Successful!',
-      duration: Snackbar.LENGTH_SHORT,
-      backgroundColor: 'green',
-      // textColor: 'black'
-    });
-    // navigation.navigate('home');
+    dispatch(
+      addAddress({
+        name: name,
+        address: address,
+        phone: mobileNo,
+        pincode: pincode,
+        type: homeChecked ? homeChecked : officechecked,
+      }),
+    );
+    navigation.navigate('checkout');
   };
 
   return (
@@ -41,6 +51,8 @@ const AddressScreen = () => {
             <View style={styles.cartBox}>
               <Text style={styles.subtitle}>Name</Text>
               <TextInput
+                value={name}
+                onChangeText={text => setName(text)}
                 multiline
                 placeholder="Enter name"
                 style={styles.input}
@@ -48,6 +60,8 @@ const AddressScreen = () => {
 
               <Text style={styles.subtitle}>Address</Text>
               <TextInput
+                value={address}
+                onChangeText={text => setAddress(text)}
                 multiline
                 placeholder="Enter address"
                 style={styles.input}
@@ -55,6 +69,9 @@ const AddressScreen = () => {
 
               <Text style={styles.subtitle}>Mobile number</Text>
               <TextInput
+                value={mobileNo}
+                onChangeText={text => setMobileNo(text)}
+                keyboardType="number-pad"
                 multiline
                 placeholder="Enter phone number"
                 style={styles.input}
@@ -62,6 +79,9 @@ const AddressScreen = () => {
 
               <Text style={styles.subtitle}>Pin code</Text>
               <TextInput
+                value={pincode}
+                onChangeText={text => setPincode(text)}
+                keyboardType="number-pad"
                 multiline
                 placeholder="Enter postal code"
                 style={styles.input}
@@ -192,7 +212,7 @@ const AddressScreen = () => {
 
         <View style={styles.priceBox}>
           <View style={styles.innerpriceBox}>
-            <Text style={styles.priceTxt}>Price : ₹ 1200</Text>
+            <Text style={styles.priceTxt}>Price : ₹ {selectorforAmount}</Text>
             <TouchableOpacity
               onPress={() => PurchasedFunction()}
               style={styles.purchasebtn}>

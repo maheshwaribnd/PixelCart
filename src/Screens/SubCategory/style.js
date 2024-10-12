@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     height: 64,
     width: 64,
     borderWidth: 0.5,
-    borderRadius: 12,
+    borderRadius: 50,
   },
 
   ParticularCatlistView: {
@@ -51,6 +51,7 @@ export const styles = StyleSheet.create({
   title: {
     fontFamily: Poppins_Medium,
     color: COLOR.Black,
+    textAlign: 'center',
     fontSize: 16,
     width: 203,
   },

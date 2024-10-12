@@ -17,29 +17,75 @@ import CustomBtn2 from '../../../Components/CustomBtn/CustomBtn2';
 import {CartDetailsArray} from '../../../Arrays/CartDetailsArray/CartDetailsArray';
 import {useNavigation} from '@react-navigation/native';
 import {Checkbox} from 'react-native-paper';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  addToCart,
+  deleteToCart,
+  removeToCart,
+} from '../../../Redux/Reducers/Cart';
+import {addTotalAmount} from '../../../Redux/Reducers/TotalAmount';
 
 const CartScreen = () => {
+  const dispatch = useDispatch();
+  const Cart = useSelector(state => state.Cart);
   const navigation = useNavigation();
   const [empty, setEmpty] = useState(true);
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
 
+  const calculateTotal = items => {
+    return items.reduce((total, item) => total + item.price * item.qty, 0);
+  };
+
+  const totalAmount = calculateTotal(Cart);
+
+  const AddToCartFunction = item => {
+    dispatch(addToCart(item));
+  };
+
+  const RemovefromCartFunction = item => {
+    if (item.qty > 1) {
+      dispatch(removeToCart(item));
+    } else {
+      dispatch(deleteToCart(item.id));
+      navigation.goBack();
+    }
+  };
+
+  const onHandleDelete = id => {
+    if (Cart?.length > 1) {
+      dispatch(deleteToCart(id));
+    } else {
+      dispatch(deleteToCart(id));
+      navigation.goBack();
+    }
+  };
+
+  const PurchaseFunction = () => {
+    dispatch(addTotalAmount({Amount: totalAmount}));
+    navigation.navigate('address');
+  };
+
+  const AddItemsFunction = () => {
+    navigation.navigate('home')
+  }
+
   const CartDetailsFunction = ({item}) => {
     return (
-      <View>
+      <View style={{marginBottom: 6}}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('productcartdetail')}
+          onPress={() => navigation.navigate('productcartdetails')}
           activeOpacity={0.7}
           style={styles.alignStyle}>
           <View style={styles.alignStyle}>
-            <Checkbox
+            {/* <Checkbox
               status={checked ? 'checked' : 'unchecked'}
               onPress={() => {
                 setChecked(!checked);
               }}
-            />
+            /> */}
             <Image
-              source={item?.image}
+              source={{uri: item?.image_name}}
               style={{height: HEIGHT(10), width: WIDTH(18), borderRadius: 14}}
             />
           </View>
@@ -49,7 +95,7 @@ const CartScreen = () => {
               {item?.desc}
             </Text>
             <Text style={[styles.name, {fontFamily: Poppins_Regular}]}>
-              ₹ {item?.price}
+              ₹ {item?.price * item?.qty}
             </Text>
           </View>
         </TouchableOpacity>
@@ -57,24 +103,38 @@ const CartScreen = () => {
         {/* Quantity */}
         <View style={[styles.alignStyle, {alignItems: 'center'}]}>
           <View style={styles.QuantityWrapper}>
-            <TouchableOpacity style={styles.qty} activeOpacity={0.4}>
+            <TouchableOpacity
+              onPress={() => RemovefromCartFunction(item)}
+              style={[
+                styles.qty,
+                {
+                  borderBottomLeftRadius: 6,
+                  borderTopLeftRadius: 6,
+                  marginLeft: 9,
+                },
+              ]}
+              activeOpacity={0.4}>
               <AntDesign name="minus" color={COLOR.White} size={16} />
             </TouchableOpacity>
-            <View>
-              <Text
-                style={{
-                  fontFamily: Poppins_Regular,
-                  fontSize: 16,
-                }}>
-                1{/* {item?.qty} */}
+            <View style={styles.quantityCount}>
+              <Text style={[styles.name, {fontFamily: Poppins_Regular}]}>
+                {item?.qty}
               </Text>
             </View>
-            <TouchableOpacity style={styles.qty} activeOpacity={0.4}>
+            <TouchableOpacity
+              onPress={() => AddToCartFunction(item)}
+              style={[
+                styles.qty,
+                {borderBottomEndRadius: 6, borderTopRightRadius: 6},
+              ]}
+              activeOpacity={0.4}>
               <AntDesign name="plus" color={COLOR.White} size={15} />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.removebtnContainer}>
+          <TouchableOpacity
+            onPress={() => onHandleDelete(item?.id)}
+            style={styles.removebtnContainer}>
             <Text style={styles.removeBtnTxt}>Remove</Text>
           </TouchableOpacity>
         </View>
@@ -132,22 +192,10 @@ const CartScreen = () => {
       <CustomHeader name="Cart" />
       <ScrollView>
         <View style={{flex: 1, justifyContent: 'center'}}>
-          {empty ? (
-            <View style={styles.cartBox}>
-              <View style={[styles.alignStyle, {alignItems: 'center'}]}>
-                <Text style={styles.title}>Your Cart</Text>
-                <Text style={styles.cartEmptyTxt}>Cart is empty</Text>
-              </View>
-
-              <CustomBtn2
-                name="Add items in cart"
-                onPress={() => setEmpty(false)}
-              />
-            </View>
-          ) : (
+          {Cart.length > 0 ? (
             <View style={styles.cartBox}>
               <FlatList
-                data={CartDetailsArray}
+                data={Cart}
                 renderItem={({item}) => <CartDetailsFunction item={item} />}
               />
 
@@ -158,14 +206,26 @@ const CartScreen = () => {
               />
               <View style={[styles.alignStyle, {paddingHorizontal: WIDTH(3)}]}>
                 <Text style={styles.total}>Total: </Text>
-                <Text style={styles.total}>₹ 38000</Text>
+                <Text style={styles.total}>₹ {totalAmount.toFixed(2)}</Text>
               </View>
               <View style={{justifyContent: 'center'}}>
                 <CustomBtn2
                   name="Purchase"
-                  onPress={() => navigation.navigate('address')}
+                  onPress={() => PurchaseFunction()}
                 />
               </View>
+            </View>
+          ) : (
+            <View style={styles.cartBox}>
+              <View style={[styles.alignStyle, {alignItems: 'center'}]}>
+                <Text style={styles.title}>Your Cart</Text>
+                <Text style={styles.cartEmptyTxt}>Cart is empty</Text>
+              </View>
+
+              <CustomBtn2
+                name="Add items in cart"
+                onPress={() => AddItemsFunction()}
+              />
             </View>
           )}
 

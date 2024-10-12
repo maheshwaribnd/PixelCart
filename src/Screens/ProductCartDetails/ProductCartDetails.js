@@ -1,13 +1,16 @@
 import {
+  Alert,
   Animated,
   FlatList,
+  Linking,
   ScrollView,
+  Share,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {styles} from './style';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import COLOR from '../../Config/color.json';
 import {HEIGHT, WIDTH} from '../../Config/appConst';
 import Feather from 'react-native-vector-icons/Feather';
@@ -19,12 +22,20 @@ import {SimilarProductArray} from '../../Arrays/SimilarProductArray/SimilarProdu
 import {ReviewPhotosArray} from '../../Arrays/ReviewPhotosArray/ReviewPhotosArray';
 import {Rating} from 'react-native-elements';
 import Snackbar from 'react-native-snackbar';
+import {useDispatch} from 'react-redux';
+import {addToCart} from '../../Redux/Reducers/Cart';
+import ApiManager from '../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProductCartDetails = () => {
-  const slides = useRef(null);
+  const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
-  const [expand, setExpand] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  // const [rating, setRating] = useState(null);
+
+  const particularItem = route?.params?.item;
 
   const scrollX = useRef(new Animated.Value(0)).current;
   const viewConfig = useRef({viewAreaCoveragePercentThreshold: 50}).current;
@@ -33,12 +44,22 @@ const ProductCartDetails = () => {
     // setCurrentIndex(viewableItems[0].index);
   }).current;
 
-  const ShowProDetailsFunction = ({item}) => {
-    return (
-      <View style={styles.listView}>
-        <Image source={item?.image} style={styles.img} />
-      </View>
-    );
+  useEffect(() => {
+    ProductReviewAPI();
+  }, []);
+
+  const ProductReviewAPI = () => {
+    ApiManager.getProductReviews(particularItem?.id).then(res => {
+      if (res?.data?.status === 200) {
+        const response = res?.data?.reviews;
+        setReviews(response);
+        console.log('review', res?.data);
+      }
+    });
+  };
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
   };
 
   const ShowSimilarProduct = ({item}) => {
@@ -61,91 +82,85 @@ const ProductCartDetails = () => {
     );
   };
 
-  const subStringFunction = () => {
-    const longText =
-      'Be transported into the fierce battles and imaginative world of Dragon Ball with these super exciting Dragon Ball Evolved figures. These 5-inch favorites are expertly crafted and intricately detailed with over 16 points of articulation. So authentic and realistic you might think they re the real thing. His training and knowledge are in total harmony with his natural drives and impulses. His skills of offense and defense are balanced and refined and he is in touch with his true impulse and pure drive. He can do whatever it takes to achieve the ultimate goal and destroy all evil.';
-    if (longText.length <= 230) {
-      return longText;
-    } else {
-      return longText.substring(0, 222);
+  const longText =
+    'Be transported into the fierce battles and imaginative world of Dragon Ball with these super exciting Dragon Ball Evolved figures. These 5-inch favorites are expertly crafted and intricately detailed with over 16 points of articulation. So authentic and realistic you might think they re the real thing. His training and knowledge are in total harmony with his natural drives and impulses. His skills of offense and defense are balanced and refined and he is in touch with his true impulse and pure drive. He can do whatever it takes to achieve the ultimate goal and destroy all evil.';
+
+  const shareContent = async () => {
+    try {
+      const result = await Share.share({
+        message: 'Check out this amazing content!',
+        url: 'https://example.com', // optional
+        title: 'Share Title', // optional
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared with activity type:', result.activityType);
+        } else {
+          console.log('Content shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
     }
   };
 
-  const subStringReviewFunction = () => {
-    const longText =
-      'An incredible depiction of Gokus Super Saiyan form, the SH Figuarts action figure captures the essence of his power.';
-    if (longText.length <= 160) {
-      return longText;
-    } else {
-      return longText.substring(0, 160);
-    }
-  };
-
-  const addToCartFunction = () => {
-    return Snackbar.show({
+  const addToCartFunction = async item => {
+    Snackbar.show({
       text: 'Product Added!',
       duration: Snackbar.LENGTH_SHORT,
       backgroundColor: 'grey',
-      // textColor: 'black'
     });
+    dispatch(addToCart(item));
+    setTimeout(() => {
+      navigation.navigate('cart');
+    }, 300);
+  };
+
+  const WriteReviewFunction = async item => {
+    const jsonProduct = JSON.stringify(item);
+    await AsyncStorage.setItem('product', jsonProduct);
+    navigation.navigate('reviewscreen');
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.cartBox}>
-        {/* <Image
-          source={require('../../Images/TrendingProImg/TrendPro4.png')}
-          style={styles.img}
-        /> */}
+        <Image source={{uri: particularItem?.image_name}} style={styles.img} />
 
-        <FlatList
-          data={PartiProductDetails}
-          renderItem={({item}) => <ShowProDetailsFunction item={item} />}
-          keyExtractor={item => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          // bounces={false}
-          onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {x: scrollX}}}],
-            {
-              useNativeDriver: false,
-            },
-          )}
-          scrollEventThrottle={32}
-          onViewableItemsChanged={viewableItemsChanged}
-          ref={slides}
-          viewabilityConfig={viewConfig}
-        />
-        <View style={{position: 'absolute', top: HEIGHT(48), left: WIDTH(36)}}>
+        {/* <View style={{ position: 'absolute', top: HEIGHT(48), left: WIDTH(36) }}>
           <Paginator data={PartiProductDetails} scrollX={scrollX} />
-        </View>
+        </View> */}
 
-        <Text style={styles.title}>Goku Supersaiyan SH figure arts</Text>
-        <Text style={[styles.title, {fontSize: 12, color: COLOR.Gray}]}>
+        <Text style={styles.title}>{particularItem?.name}</Text>
+        {/* <Text style={[styles.title, {fontSize: 12, color: COLOR.Gray}]}>
           Brand: Bandai SH figure arts
-        </Text>
+        </Text> */}
       </View>
 
       <View style={styles.cartBox}>
         <View style={styles.alignStyle}>
           <View>
-            <Text style={styles.title}>₹ 1200</Text>
+            <Text style={styles.title}>₹ {particularItem?.price}</Text>
             <Text style={[styles.title, {fontSize: 12, color: COLOR.Gray}]}>
               Delivery by 20 July 2024
             </Text>
           </View>
 
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+          <TouchableOpacity
+            onPress={shareContent}
+            style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
             <Feather name="share-2" size={20} color={COLOR.Black} />
             <Text style={styles.shareTxt}>Share</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.alignStyle, {gap: 6}]}>
           <TouchableOpacity
             activeOpacity={0.4}
-            onPress={() => addToCartFunction()}
+            onPress={() => addToCartFunction(particularItem)}
             style={[styles.button, {backgroundColor: COLOR.BlueLightShade}]}>
             <Text style={[styles.txtBtn, {color: COLOR.BtnColor}]}>
               Add to Cart
@@ -167,15 +182,17 @@ const ProductCartDetails = () => {
           </Text>
           <View>
             <Text
+              // numberOfLines={5}
+              numberOfLines={isExpanded ? undefined : 5}
               style={[
                 styles.title,
                 {fontSize: 14, color: '#171717', width: 322},
               ]}>
-              {subStringFunction()}
+              {longText}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={toggleExpand}>
               <Text style={styles.readmore}>
-                {expand ? '...read more' : '...read less.'}
+                {isExpanded ? 'Show Less' : 'Show More'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -209,9 +226,12 @@ const ProductCartDetails = () => {
             </View>
             <View style={{flexDirection: 'row'}}>
               <Rating
+                rating={reviews?.rating}
+                // onRatingChange={newRating => setRating(newRating)}
                 showRating
-                imageSize={10}
-                onFinishRating={4}
+                // fractions={1}
+                // startingValue={0}
+                imageSize={21}
                 style={{paddingVertical: 10}}
               />
             </View>
@@ -221,15 +241,17 @@ const ProductCartDetails = () => {
 
           <View>
             <Text
+              // numberOfLines={5}
+              numberOfLines={isExpanded ? undefined : 2}
               style={[
                 styles.title,
                 {fontSize: 14, color: '#171717', width: 322},
               ]}>
-              {subStringReviewFunction()}
+              {longText}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={toggleExpand}>
               <Text style={styles.readmore}>
-                {expand ? '...read more' : '...read less.'}
+                {isExpanded ? 'Show Less' : 'Show More'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -244,7 +266,7 @@ const ProductCartDetails = () => {
 
         <TouchableOpacity
           activeOpacity={0.4}
-          onPress={() => navigation.navigate('reviewscreen')}
+          onPress={() => WriteReviewFunction(particularItem)}
           style={styles.reviewbtn}>
           <Text style={styles.reviewtxtBtn}>Write a review</Text>
         </TouchableOpacity>

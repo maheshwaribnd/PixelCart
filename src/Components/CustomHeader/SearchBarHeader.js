@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import ApiManager from '../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SearchBarHeader = () => {
   const navigation = useNavigation();
@@ -13,11 +14,13 @@ const SearchBarHeader = () => {
   const [allProductListResponse, setAllProductListResponse] = useState([]);
   const [filterProducts, setFilteredProducts] = useState([]);
   const [search, setSearch] = useState('');
+  const [userData, setUserData] = useState([]);
 
   // For All products List
 
   useEffect(() => {
     AllProductList();
+    UserProfileAPIFunction();
   }, []);
 
   const AllProductList = () => {
@@ -28,6 +31,24 @@ const SearchBarHeader = () => {
       })
       .catch(error => {
         console.error(error);
+      });
+  };
+
+  const UserProfileAPIFunction = async () => {
+    const userDetails = await AsyncStorage.getItem('userData');
+    const user = JSON.parse(userDetails);
+    const userId = user?.customer_id;
+
+    const params = {
+      user_id: userId,
+    };
+
+    ApiManager.userData(params)
+      .then(res => {
+        setUserData(res?.data);
+      })
+      .catch(err => {
+        console.log('err', err);
       });
   };
 
@@ -46,9 +67,9 @@ const SearchBarHeader = () => {
     <View style={styles.headerView}>
       <View>
         <Text>Hello,</Text>
-        <Text style={styles.headerName}>Mahi</Text>
+        <Text style={styles.headerName}>{userData?.users_name}</Text>
       </View>
-      <View style={styles.searchbar}>
+      {/* <View style={styles.searchbar}>
         <TextInput
           value={search}
           onChangeText={() => filteredSearch()}
@@ -60,7 +81,7 @@ const SearchBarHeader = () => {
           color={COLOR.BtnColor}
           style={styles.searchIcon}
         />
-      </View>
+      </View> */}
       <Ionicons name="notifications-outline" size={25} color={COLOR.BtnColor} />
     </View>
   );

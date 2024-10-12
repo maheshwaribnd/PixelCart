@@ -1,5 +1,5 @@
 import {Text, TextInput, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {styles} from './style';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
 import {HEIGHT, WIDTH} from '../../Config/appConst';
@@ -7,8 +7,68 @@ import COLOR from '../../Config/color.json';
 import {Image} from 'react-native';
 import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
 import {Rating} from 'react-native-elements';
+import ApiManager from '../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
 
 const ReviewScreen = () => {
+  const navigation = useNavigation();
+
+  const [reviewHeadline, setReviewHeadline] = useState('');
+  const [reviewDesc, setReviewDesc] = useState('');
+  const [userIdd, setUserId] = useState(null);
+  const [productId, setProductId] = useState(null);
+  const [rating, setRating] = useState(0);
+
+  useEffect(() => {
+    const fetchIds = async () => {
+      try {
+        const userDetails = await AsyncStorage.getItem('userData');
+        const user = JSON.parse(userDetails);
+        const userId = user?.customer_id;
+
+        const jsonProduct = await AsyncStorage.getItem('product');
+        const product = JSON.parse(jsonProduct);
+        const productID = product?.id;
+
+        if (userId !== null) {
+          setUserId(userId);
+        }
+        if (productID !== null) {
+          setProductId(productID);
+        }
+      } catch (error) {
+        console.error('Error retrieving IDs:', error);
+      }
+    };
+
+    fetchIds();
+  }, []);
+
+  const ReviewPostAPI = async () => {
+    const params = {
+      user_id: userIdd,
+      review: reviewHeadline,
+      product_id: productId,
+      image: '',
+      rating: rating,
+    };
+
+    // navigation.navigate('productcartdetails');
+    // ApiManager.postProductReview(params)
+    //   .then(res => {
+    //     console.log('res?.data', res?.data);
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
+  };
+
+  const PostReview = () => {
+    // ReviewPostAPI();
+    navigation.navigate('productcartdetails');
+  };
+
   return (
     <View>
       <CustomHeader name="Write a review" />
@@ -30,6 +90,8 @@ const ReviewScreen = () => {
         <View style={styles.cartBox}>
           <Text style={styles.text}>Review headline</Text>
           <TextInput
+            value={reviewHeadline}
+            onChangeText={text => setReviewHeadline(text)}
             multiline
             placeholder="Write review headline"
             style={styles.input}
@@ -40,27 +102,30 @@ const ReviewScreen = () => {
             <Text style={[styles.text, {color: COLOR.Gray}]}>(optional)</Text>
           </Text>
           <TextInput
+            value={reviewDesc}
+            onChangeText={text => setReviewDesc(text)}
             multiline
             placeholder="e.g: write your experience with item you purchased"
             style={styles.input}
           />
 
           <Text style={styles.text}>Rating</Text>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Rating
-              // showRating
-              imageSize={30}
-              onFinishRating={4}
+              rating={rating}
+              onRatingChange={newRating => setRating(newRating)}
+              showRating
+              // fractions={1}
+              startingValue={0}
+              imageSize={21}
               style={{paddingVertical: 10}}
             />
+            <Text>{}</Text>
           </View>
         </View>
       </View>
       <View style={{marginLeft: WIDTH(4)}}>
-        <CustomBtn1
-          name="Submit review"
-          onPress={() => console.log('Write Review')}
-        />
+        <CustomBtn1 name="Submit review" onPress={() => PostReview()} />
       </View>
     </View>
   );

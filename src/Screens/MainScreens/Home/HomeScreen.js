@@ -10,7 +10,6 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 import {HEIGHT, WIDTH} from '../../../Config/appConst';
 import Paginator from '../../../Components/Pagination/Pagination';
-import SearchBarHeader from '../../../Components/CustomHeader/SearchBarHeader';
 import {useNavigation} from '@react-navigation/native';
 import {styles} from './style';
 import ApiManager from '../../../API/Api';
@@ -20,7 +19,6 @@ const HomeScreen = () => {
   const slides = useRef(null);
   const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [loader, setLoader] = useState(false);
   const [bannerResponse, setBannerResponse] = useState([]);
   const [categoryResponse, setcategoryResponse] = useState([]);
@@ -130,6 +128,7 @@ const HomeScreen = () => {
         console.error(error);
       });
   };
+
   // Calculation for Slider
 
   const viewableItemsChanged = useRef(({viewableItems}) => {
@@ -141,7 +140,7 @@ const HomeScreen = () => {
   const CategoryImgsList = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('subcategory')}
+        onPress={() => navigation.navigate('subcategory', {catID: item?.id})}
         style={[styles.listView, {marginHorizontal: WIDTH(0.9)}]}>
         <Image source={{uri: item?.icon}} style={styles.catlistImg} />
         <Text style={[styles.name, {fontSize: 10, width: WIDTH(19)}]}>
@@ -166,6 +165,7 @@ const HomeScreen = () => {
     const obj = {
       image_name: item.products_img,
       name: item?.products_name,
+      products_desc: item?.products_desc,
       price: item?.price,
       id: item.id,
       qty: 0,
@@ -189,6 +189,7 @@ const HomeScreen = () => {
     const obj = {
       image_name: item.products_img,
       name: item?.products_name,
+      products_desc: item?.products_desc,
       price: item?.price,
       id: item.id,
       qty: 0,
@@ -214,6 +215,7 @@ const HomeScreen = () => {
     const obj = {
       image_name: item.products_img,
       name: item?.products_name,
+      products_desc: item?.products_desc,
       price: item?.price,
       id: item.id,
       qty: 0,
@@ -237,6 +239,7 @@ const HomeScreen = () => {
     const obj = {
       image_name: item?.products_img,
       name: item?.products_name,
+      products_desc: item?.products_desc,
       price: item?.price,
       id: item.id,
       qty: 0,
@@ -269,8 +272,6 @@ const HomeScreen = () => {
 
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>
-      <SearchBarHeader />
-
       {loader ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator />

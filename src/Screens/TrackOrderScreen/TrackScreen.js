@@ -4,10 +4,13 @@ import {styles} from './style';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
 import COLOR from '../../Config/color.json';
 import StepIndicator from 'react-native-step-indicator';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import CustomBtn2 from '../../Components/CustomBtn/CustomBtn2';
 
 const TrackScreen = () => {
+  const route = useRoute();
+  const Product = route?.params?.product;
+
   const navigation = useNavigation();
   const [currentPosition, setCurrentPosition] = useState(0);
 
@@ -87,9 +90,9 @@ const TrackScreen = () => {
             style={styles.img}
           />
           <View>
-            <Text style={styles.name}>Product Name</Text>
+            <Text style={styles.name}>{Product?.name}</Text>
             <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
-              abcde
+              {Product?.order_placed_at}
             </Text>
           </View>
         </View>

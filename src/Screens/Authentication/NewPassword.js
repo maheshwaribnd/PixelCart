@@ -73,7 +73,7 @@ const NewPassword = () => {
     } else {
       if (passwordError && confirmpasswordError) {
         Snackbar.show({
-          text: 'password must contain character, digit and special character',
+          text: 'Password must contain character, digit and special character',
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
@@ -96,6 +96,7 @@ const NewPassword = () => {
               placeholderTextColor={COLOR.Gray}
               value={password}
               onChangeText={onPasswordChange}
+              secureTextEntry={!showPassword}
             />
             <Entypo
               name={showPassword ? 'eye' : 'eye-with-line'}
@@ -114,6 +115,7 @@ const NewPassword = () => {
               placeholderTextColor={COLOR.Gray}
               value={confirmpassword}
               onChangeText={onConfirmPasswordChange}
+              secureTextEntry={!showConfirmPassword}
             />
             <Entypo
               name={showConfirmPassword ? 'eye' : 'eye-with-line'}

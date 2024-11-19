@@ -5,7 +5,7 @@ import Icons from '../Config/Icons';
 import COLOR from '../Config/color.json';
 import * as Animatable from 'react-native-animatable';
 import {useNavigation} from '@react-navigation/native';
-import HomeScreen from '../Screens/MainScreens/Home/HomeScreen';
+// import HomeScreen from '../Screens/MainScreens/Home/HomeScreen';
 import CategoryScreen from '../Screens/MainScreens/Category/CategoryScreen';
 import CartScreen from '../Screens/MainScreens/Cart/CartScreen';
 import ProfileScreen from '../Screens/MainScreens/Profile/ProfileScreen';
@@ -13,6 +13,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {FONTSIZE, HEIGHT, WIDTH} from '../Config/appConst';
+import Home from '../Screens/MainScreens/Home/Home';
 
 const TabArr = [
   {
@@ -20,7 +21,7 @@ const TabArr = [
     label: 'Home',
     type: Octicons,
     icon: 'home',
-    component: HomeScreen,
+    component: Home,
   },
   {
     route: 'category',
@@ -127,6 +128,7 @@ const TabNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
+        tabBarHideOnKeyboard: true,
       }}>
       {TabArr.map((item, index) => {
         return (

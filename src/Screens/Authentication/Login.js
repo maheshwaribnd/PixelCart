@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ImageBackground,
   ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
@@ -16,6 +15,7 @@ import {
   WIDTH,
 } from '../../Config/appConst';
 import COLOR from '../../Config/color.json';
+import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
 import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
 import ApiManager from '../../API/Api';
@@ -27,6 +27,7 @@ const Login = () => {
 
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [userNameError, setUserNameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
@@ -58,6 +59,10 @@ const Login = () => {
     const formattedInpt = text.replace(/\s/g, '');
     setPassword(formattedInpt);
     setPasswordError(false);
+  };
+
+  const showPasswordFunction = () => {
+    setShowPassword(!showPassword);
   };
 
   const signInFunction = () => {
@@ -94,7 +99,6 @@ const Login = () => {
 
     await ApiManager.userLogin(params)
       .then(async res => {
-        console.log('res?.data', res?.data);
         const userData = JSON.stringify(res?.data);
         await AsyncStorage.setItem('userData', userData);
         navigation.navigate('Dashboard');
@@ -104,6 +108,9 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
+        <Text style={styles.skipBtn}>Skip</Text>
+      </TouchableOpacity>
       <View style={styles.logo}>
         <Text style={styles.signInTxt}>SignIn</Text>
         <View>
@@ -117,7 +124,7 @@ const Login = () => {
       <ScrollView style={{padding: WIDTH(4)}}>
         <View>
           <Text style={styles.subTitle}>Email / Mobile Number</Text>
-          <View>
+          <View style={styles.inputView}>
             <TextInput
               style={styles.InputField}
               placeholder="Enter email or mobile no"
@@ -129,13 +136,22 @@ const Login = () => {
           </View>
 
           <Text style={styles.subTitle}>Password</Text>
-          <View>
+          <View style={styles.inputView}>
             <TextInput
               style={styles.InputField}
               placeholder="Enter password"
               placeholderTextColor={COLOR.Gray}
               value={password}
               onChangeText={onPasswordChange}
+              secureTextEntry={!showPassword}
+            />
+
+            <Entypo
+              name={showPassword ? 'eye' : 'eye-with-line'}
+              onPress={showPasswordFunction}
+              size={20}
+              color={COLOR.Black}
+              style={{paddingRight: WIDTH(3)}}
             />
           </View>
         </View>
@@ -197,16 +213,27 @@ const styles = StyleSheet.create({
   },
 
   InputField: {
+    paddingLeft: 12,
+    color: COLOR.Black,
+    width: WIDTH(80),
+  },
+
+  inputView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
     marginTop: HEIGHT(1),
     marginBottom: HEIGHT(2),
-    paddingLeft: WIDTH(4),
-    height: 48,
-    borderRadius: 12,
-    fontSize: 14,
-    borderWidth: 1,
-    color: COLOR.Black,
-    borderColor: COLOR.Gray,
-    backgroundColor: COLOR.White,
+  },
+
+  skipBtn: {
+    position: 'absolute',
+    end: 15,
+    top: 10,
+    color: 'gray',
+    fontSize: 15,
   },
 
   forgot: {

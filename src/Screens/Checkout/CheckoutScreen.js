@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   BackHandler,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -30,6 +31,7 @@ const CheckoutScreen = () => {
   const selectorforAmount = useSelector(state => state.addTotalAmount?.Amount);
   const addressSelector = useSelector(state => state.addAddress);
   const Cart = useSelector(state => state.Cart);
+  const Products = useSelector(state => state.ProductListingFunction?.products);
 
   const [checked, setChecked] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -43,9 +45,14 @@ const CheckoutScreen = () => {
           onPress: () => null,
           style: 'cancel',
         },
-        {text: 'YES', onPress: () => BackHandler.exitApp()}, // You can customize this to navigate back instead
+        {
+          text: 'YES',
+          onPress: () => {
+            navigation.goBack();
+          },
+        },
       ]);
-      return true; // Prevent default back action
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(
@@ -53,8 +60,8 @@ const CheckoutScreen = () => {
       backAction,
     );
 
-    return () => backHandler.remove(); // Clean up the listener on unmount
-  }, []);
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const checkoutAPI = async () => {
     const userDetails = await AsyncStorage.getItem('userData');
@@ -69,11 +76,9 @@ const CheckoutScreen = () => {
       pincode: addressSelector?.name,
       payment: paymentMethod,
       mobile: addressSelector?.phone,
-      products: Cart,
+      products: Products,
       totalAmount: selectorforAmount,
     };
-
-    console.log('params', params);
 
     ApiManager.checkout(params)
       .then(res => {
@@ -135,7 +140,7 @@ const CheckoutScreen = () => {
         </View>
       </View>
 
-      <View style={{padding: HEIGHT(2)}}>
+      <View style={{paddingHorizontal: HEIGHT(2), paddingVertical: HEIGHT(1)}}>
         {/* UPI  */}
         <View style={styles.box2}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -230,22 +235,6 @@ const styles = StyleSheet.create({
     padding: WIDTH(2),
     marginTop: HEIGHT(2),
     justifyContent: 'center',
-    backgroundColor: COLOR.White,
-    borderRadius: 9,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-
-  boxForHeight: {
-    height: HEIGHT(39),
-    padding: WIDTH(2),
-    marginBottom: HEIGHT(2),
     backgroundColor: COLOR.White,
     borderRadius: 9,
     shadowColor: '#000',
@@ -457,6 +446,6 @@ const styles = StyleSheet.create({
   donebtnText: {
     fontFamily: NotoSans_Bold,
     fontSize: FONTSIZE(2),
-    color: COLOR.ButtonNameColor,
+    color: COLOR.Black,
   },
 });

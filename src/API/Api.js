@@ -47,6 +47,8 @@ const requestPath = {
   userData: 'getUser',
   // Get Product Review
   productReviews: 'index',
+
+  similarProducts: 'getSimilarProducts',
 };
 
 const ApiManager = {
@@ -118,6 +120,10 @@ const ApiManager = {
 
   getProductReviews: prodID => {
     return request.get(`${requestPath.productReviews}/${prodID}`);
+  },
+
+  getSimilarProducts: prodID => {
+    return request.get(`${requestPath.similarProducts}/${prodID}`);
   },
 };
 

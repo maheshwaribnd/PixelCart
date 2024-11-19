@@ -26,14 +26,16 @@ import {useDispatch} from 'react-redux';
 import {addToCart} from '../../Redux/Reducers/Cart';
 import ApiManager from '../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {addTotalAmount} from '../../Redux/Reducers/TotalAmount';
+import {ProductListingFunction} from '../../Redux/Reducers/ProductList';
 
 const ProductCartDetails = () => {
   const dispatch = useDispatch();
   const route = useRoute();
   const navigation = useNavigation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [reviews, setReviews] = useState([]);
-  // const [rating, setRating] = useState(null);
+  const [reviewsResponse, setReviewsResponse] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
 
   const particularItem = route?.params?.item;
 
@@ -46,14 +48,23 @@ const ProductCartDetails = () => {
 
   useEffect(() => {
     ProductReviewAPI();
+    SimilarProductsAPI();
   }, []);
 
   const ProductReviewAPI = () => {
     ApiManager.getProductReviews(particularItem?.id).then(res => {
+      // if (res?.data?.status === 200) {
+      const response = res?.data?.reviews;
+      setReviewsResponse(response);
+      // }
+    });
+  };
+
+  const SimilarProductsAPI = async () => {
+    await ApiManager.getSimilarProducts(particularItem?.id).then(res => {
       if (res?.data?.status === 200) {
-        const response = res?.data?.reviews;
-        setReviews(response);
-        console.log('review', res?.data);
+        const response = res?.data?.similarProducts;
+        setSimilarProducts(response);
       }
     });
   };
@@ -65,10 +76,15 @@ const ProductCartDetails = () => {
   const ShowSimilarProduct = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('particularcategory')}
+        onPress={() =>
+          navigation.navigate('productcartdetails', {particularItem: item})
+        }
         style={styles.similarProductView}>
-        <Image source={item?.img} />
-        <Text style={[styles.name, {fontSize: 12}]}>{item?.title}</Text>
+        <Image
+          source={{uri: item?.products_img}}
+          style={{height: 85, width: 85}}
+        />
+        <Text style={[styles.name, {fontSize: 12}]}>{item?.products_name}</Text>
         <Text style={[styles.name, {fontSize: 16}]}>₹{item?.price}</Text>
       </TouchableOpacity>
     );
@@ -114,15 +130,79 @@ const ProductCartDetails = () => {
       backgroundColor: 'grey',
     });
     dispatch(addToCart(item));
+    dispatch(
+      ProductListingFunction({product_id: item?.id, quantity: item?.qty}),
+    );
     setTimeout(() => {
       navigation.navigate('cart');
     }, 300);
+  };
+
+  const PurchaseButtonFn = async item => {
+    dispatch(addToCart(item));
+    dispatch(
+      ProductListingFunction({product_id: item?.id, quantity: item?.qty}),
+    );
+    dispatch(addTotalAmount({Amount: item?.price}));
+    navigation.navigate('address');
   };
 
   const WriteReviewFunction = async item => {
     const jsonProduct = JSON.stringify(item);
     await AsyncStorage.setItem('product', jsonProduct);
     navigation.navigate('reviewscreen');
+  };
+
+  const ShowReviews = ({item}) => {
+    return (
+      <View>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+            <Image
+              source={require('../../Images/DealsOfTheDay/Img1.png')}
+              style={{width: 32, height: 32, borderRadius: 16}}
+            />
+            <Text style={styles.reviewerName}>{item?.user_name}</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <Rating
+              startingValue={item?.rating}
+              onFinishRating={newRating => setReviewsResponse(newRating)}
+              showRating
+              minValue={1}
+              imageSize={16}
+              style={{paddingVertical: 10}}
+            />
+          </View>
+        </View>
+
+        <Text style={styles.reviewerName}>{item?.heading}</Text>
+
+        <View>
+          <Text
+            // numberOfLines={5}
+            numberOfLines={isExpanded ? undefined : 2}
+            style={[
+              styles.title,
+              {fontSize: 14, color: '#171717', width: 322},
+            ]}>
+            {item?.descriptio}
+          </Text>
+          {/* <TouchableOpacity onPress={toggleExpand}>
+            <Text style={styles.readmore}>
+              {isExpanded ? 'Show Less' : 'Show More'}
+            </Text>
+          </TouchableOpacity> */}
+        </View>
+
+        <FlatList
+          data={ReviewPhotosArray}
+          renderItem={({item}) => <ShowReviewPhotos item={item} />}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+    );
   };
 
   return (
@@ -169,7 +249,7 @@ const ProductCartDetails = () => {
 
           <TouchableOpacity
             activeOpacity={0.4}
-            onPress={() => navigation.navigate('address')}
+            onPress={() => PurchaseButtonFn(particularItem)}
             style={[styles.button, {backgroundColor: COLOR.BtnColor}]}>
             <Text style={styles.txtBtn}>Purchase</Text>
           </TouchableOpacity>
@@ -188,7 +268,7 @@ const ProductCartDetails = () => {
                 styles.title,
                 {fontSize: 14, color: '#171717', width: 322},
               ]}>
-              {longText}
+              {particularItem?.products_desc}
             </Text>
             <TouchableOpacity onPress={toggleExpand}>
               <Text style={styles.readmore}>
@@ -205,7 +285,7 @@ const ProductCartDetails = () => {
         </Text>
 
         <FlatList
-          data={SimilarProductArray}
+          data={similarProducts}
           renderItem={({item}) => <ShowSimilarProduct item={item} />}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -216,51 +296,9 @@ const ProductCartDetails = () => {
         </Text>
 
         <View>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Image
-                source={require('../../Images/DealsOfTheDay/Img1.png')}
-                style={{width: 32, height: 32, borderRadius: 16}}
-              />
-              <Text style={styles.reviewerName}>John dory</Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              <Rating
-                rating={reviews?.rating}
-                // onRatingChange={newRating => setRating(newRating)}
-                showRating
-                // fractions={1}
-                // startingValue={0}
-                imageSize={21}
-                style={{paddingVertical: 10}}
-              />
-            </View>
-          </View>
-
-          <Text style={styles.reviewerName}>John dory</Text>
-
-          <View>
-            <Text
-              // numberOfLines={5}
-              numberOfLines={isExpanded ? undefined : 2}
-              style={[
-                styles.title,
-                {fontSize: 14, color: '#171717', width: 322},
-              ]}>
-              {longText}
-            </Text>
-            <TouchableOpacity onPress={toggleExpand}>
-              <Text style={styles.readmore}>
-                {isExpanded ? 'Show Less' : 'Show More'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
           <FlatList
-            data={ReviewPhotosArray}
-            renderItem={({item}) => <ShowReviewPhotos item={item} />}
-            horizontal
-            showsHorizontalScrollIndicator={false}
+            data={reviewsResponse}
+            renderItem={({item}) => <ShowReviews item={item} />}
           />
         </View>
 

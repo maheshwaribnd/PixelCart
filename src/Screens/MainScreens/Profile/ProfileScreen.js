@@ -1,68 +1,84 @@
 import {Image, Text, TouchableOpacity, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {styles} from './style';
 import CustomHeader from '../../../Components/CustomHeader/CustomHeader';
 import COLOR from '../../../Config/color.json';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {Switch} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import CustomBtn1 from '../../../Components/CustomBtn/CustomBtn1';
 import {HEIGHT} from '../../../Config/appConst';
+import {useDispatch, useSelector} from 'react-redux';
 import ApiManager from '../../../API/Api';
+import {ProductListingFunction} from '../../../Redux/Reducers/ProductList';
 
 const ProfileScreen = () => {
+  const dispatch = useDispatch();
+  const selector = useSelector(state => state?.UserDetails);
+
   const navigation = useNavigation();
   const [isEnabled, setIsEnabled] = useState(false);
-  const [userData, setUserData] = useState([]);
+  const [profileData, setProfileData] = useState([]);
+  const [userData, setUser] = useState([]);
 
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-  useEffect(() => {
-    UserProfileAPIFunction();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserProfile = async () => {
+        const userDetails = await AsyncStorage.getItem('userData');
+        const user = JSON.parse(userDetails);
+        setUser(user);
+        const userId = user?.customer_id;
 
-  const UserProfileAPIFunction = async () => {
-    const userDetails = await AsyncStorage.getItem('userData');
-    const user = JSON.parse(userDetails);
-    const userId = user?.customer_id;
+        const params = {
+          user_id: userId,
+        };
 
-    const params = {
-      user_id: userId,
-    };
+        ApiManager.userData(params)
+          .then(res => {
+            setProfileData(res?.data); // Update profile data on focus
+          })
+          .catch(err => {
+            console.log('Error fetching profile data:', err);
+          });
+      };
 
-    ApiManager.userData(params)
-      .then(res => {
-        setUserData(res?.data);
-      })
-      .catch(err => {
-        console.log('err', err);
-      });
-  };
+      fetchUserProfile();
+    }, []),
+  );
 
   const SignOut = async () => {
     AsyncStorage.clear();
-    navigation.navigate('login');
+    await AsyncStorage.clear();
+    dispatch(ProductListingFunction({products: []}));
+    // dispatch(ProductListingFunction({product_id: '', quantity: ''}));
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'login'}],
+    });
+    // navigation.navigate('login');
   };
 
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>
-      <CustomHeader />
+      <CustomHeader name="Profile" />
       {userData ? (
-        <View style={{flex: 1, justifyContent: 'center'}}>
+        <View style={{flex: 1}}>
           <View
             style={[
               styles.cartBox,
               {flexDirection: 'row', justifyContent: 'space-between'},
             ]}>
             <View>
-              <Text style={styles.name}>{userData?.user_profile}</Text>
-              <Text style={styles.dec}>{userData?.users_email}</Text>
-              <Text style={styles.des}>{userData?.users_mob}</Text>
+              <Text style={styles.name}>{profileData[0]?.users_name}</Text>
+              <Text style={styles.dec}>{profileData[0]?.users_email}</Text>
+              <Text style={styles.des}>{profileData[0]?.users_mob}</Text>
             </View>
             <Feather
               name="edit"

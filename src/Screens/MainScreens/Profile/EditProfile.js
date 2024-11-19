@@ -11,36 +11,57 @@ import {
 import CustomBtn1 from '../../../Components/CustomBtn/CustomBtn1';
 import ApiManager from '../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
+import {updateProfile} from '../../../Redux/Reducers/UserData';
+import {ActivityIndicator} from 'react-native-paper';
 
 const EditProfile = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+
   const [name, setName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [number, setNumber] = useState('');
   const [isInvalidInput, setisInvalidInput] = useState(false);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
+    // if (!name || !userEmail || !number || isInvalidInput) {
+    //   setError(true);
+    //   return;
+    // }
+
+    setLoading(true);
+
     const userDetails = await AsyncStorage.getItem('userData');
     const user = JSON.parse(userDetails);
     const userId = user?.customer_id;
 
     const params = {
-      user_id: userId,
-      user_name: name,
-      user_email: userEmail,
-      user_mobileno: number,
+      id: userId,
+      users_name: name,
+      users_email: userEmail,
+      users_mob: number,
     };
 
     ApiManager.profileEdit(params)
       .then(res => {
-        if (res?.data?.status === 200) {
-          navigation.goBack();
-        }
+        dispatch(
+          updateProfile({
+            id: userId,
+            users_name: name,
+            users_email: userEmail,
+            users_mob: number,
+          }),
+        );
+        // UserProfileAPIFunction();
+        navigation.navigate('profile');
       })
       .catch(err => {
         console.log(err);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const inputNameChange = text => {
@@ -50,7 +71,7 @@ const EditProfile = () => {
 
   const inputEmailChange = text => {
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var isEmailValid = emailRegex.test(userEmail);
+    var isEmailValid = emailRegex.test(text);
 
     let validate = isEmailValid;
     if (!validate) {
@@ -58,15 +79,15 @@ const EditProfile = () => {
     } else {
       setisInvalidInput(false);
     }
-    setUserEmail(userEmail);
+
     setError(false);
     const formattedInpt = text.replace(/\s/g, '');
     setUserEmail(formattedInpt);
   };
 
   const inputMobileChange = text => {
-    var phoneRegex = /^[6-9]\d{9}$/;
-    var isValidNumber = phoneRegex.test(number);
+    var phoneRegex = /^\d{11}$/;
+    var isValidNumber = phoneRegex.test(text);
 
     let validate = isValidNumber;
     if (!validate) {
@@ -117,15 +138,20 @@ const EditProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder="Enter mobile no"
+            keyboardType="number-pad"
             placeholderTextColor={COLOR.Gray}
             value={number}
-            onChangeText={inputMobileChange}
+            onChangeText={text => inputMobileChange(text)}
           />
         </View>
       </View>
 
       <View style={{marginTop: HEIGHT(4)}}>
-        <CustomBtn1 name="Save Changes" onPress={() => handleUpdate()} />
+        {loading ? (
+          <ActivityIndicator size="large" color={COLOR.Gray} />
+        ) : (
+          <CustomBtn1 name="Save Changes" onPress={handleUpdate} />
+        )}
       </View>
     </View>
   );

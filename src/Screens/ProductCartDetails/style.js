@@ -34,8 +34,8 @@ export const styles = StyleSheet.create({
 
   similarProductView: {
     justifyContent: 'center',
-    alignItems: 'flex-start',
-    gap: 6,
+    alignItems: 'center',
+    gap: 4,
     marginRight: WIDTH(2.5),
     marginHorizontal: WIDTH(1.1),
     marginVertical: HEIGHT(1.5),

@@ -26,9 +26,10 @@ export const styles = StyleSheet.create({
   input: {
     borderWidth: 0.5,
     borderRadius: 5,
+    color: COLOR.Black,
     borderColor: COLOR.Gray,
     paddingLeft: WIDTH(3),
-    marginVertical: HEIGHT(1.5),
+    marginVertical: HEIGHT(1),
     // width: 312,
     // height: 64,
   },
@@ -36,6 +37,7 @@ export const styles = StyleSheet.create({
   textStyle: {
     fontFamily: Poppins_Regular,
     fontSize: 14,
+    color: COLOR.Black,
   },
 
   subtitle: {

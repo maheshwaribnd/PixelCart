@@ -1,88 +1,81 @@
 import {StyleSheet, Text, TextInput, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import COLOR from '../../Config/color.json';
 import {HEIGHT, Poppins_Regular, WIDTH} from '../../Config/appConst';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Feather from 'react-native-vector-icons/Feather';
-import {useNavigation} from '@react-navigation/native';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import ApiManager from '../../API/Api';
+import {useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SearchBarHeader = () => {
+const SearchBarHeader = ({
+  query,
+  handleSearch,
+  loadRecentSearches,
+  filteredSearch,
+}) => {
   const navigation = useNavigation();
+  const selector = useSelector(state => state.UserDetails);
 
-  const [allProductListResponse, setAllProductListResponse] = useState([]);
-  const [filterProducts, setFilteredProducts] = useState([]);
-  const [search, setSearch] = useState('');
-  const [userData, setUserData] = useState([]);
+  const [userResponse, setUserResponse] = useState([]);
+  const [recentSearch, setRecentSearch] = useState([]);
 
-  // For All products List
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserProfile = async () => {
+        const userDetails = await AsyncStorage.getItem('userData');
+        const user = JSON.parse(userDetails);
+        const userId = user?.customer_id;
+
+        const params = {
+          user_id: userId,
+        };
+
+        ApiManager.userData(params)
+          .then(res => {
+            setUserResponse(res?.data); // Update profile data on focus
+          })
+          .catch(err => {
+            console.log('Error fetching profile data:', err);
+          });
+      };
+
+      fetchUserProfile();
+    }, []),
+  );
 
   useEffect(() => {
-    AllProductList();
-    UserProfileAPIFunction();
+    loadRecentSearches();
   }, []);
-
-  const AllProductList = () => {
-    ApiManager.allProducts()
-      .then(res => {
-        const response = res?.data?.Product_description;
-        setAllProductListResponse(response);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  };
-
-  const UserProfileAPIFunction = async () => {
-    const userDetails = await AsyncStorage.getItem('userData');
-    const user = JSON.parse(userDetails);
-    const userId = user?.customer_id;
-
-    const params = {
-      user_id: userId,
-    };
-
-    ApiManager.userData(params)
-      .then(res => {
-        setUserData(res?.data);
-      })
-      .catch(err => {
-        console.log('err', err);
-      });
-  };
-
-  const filteredSearch = text => {
-    setSearch(text);
-
-    const filterdData = allProductListResponse.filter(item =>
-      item.products_name.toLowerCase().includes(text.toLowerCase()),
-    );
-    setFilteredProducts(filterdData);
-
-    navigation.navigate('recentsearch', {filterProducts: filterProducts});
-  };
 
   return (
     <View style={styles.headerView}>
       <View>
         <Text>Hello,</Text>
-        <Text style={styles.headerName}>{userData?.users_name}</Text>
+        <Text style={styles.headerName}>{userResponse[0]?.users_name}</Text>
       </View>
-      {/* <View style={styles.searchbar}>
+      <View style={styles.searchbar}>
         <TextInput
-          value={search}
-          onChangeText={() => filteredSearch()}
+          placeholder="Search products..."
+          value={query}
+          onChangeText={text => filteredSearch(text)}
+          onSubmitEditing={() => handleSearch(query)} // Pass query here
           style={styles.searchInput}
         />
-        <Feather
+        <Fontisto
           name="search"
-          size={25}
-          color={COLOR.BtnColor}
-          style={styles.searchIcon}
+          size={21}
+          onPress={() => handleSearch(query)} // Pass query here
+          style={{paddingRight: 25}}
         />
-      </View> */}
-      <Ionicons name="notifications-outline" size={25} color={COLOR.BtnColor} />
+      </View>
+      <Ionicons
+        name="notifications-outline"
+        size={25}
+        color={COLOR.BtnColor}
+        onPress={() => navigation.navigate('notification')}
+      />
     </View>
   );
 };
@@ -108,21 +101,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Poppins_Regular,
     color: COLOR.Black,
-    textAlign: 'center',
   },
 
   searchbar: {
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     width: 260,
     height: 40,
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 20,
+    marginLeft: WIDTH(2),
     borderColor: COLOR.Gray,
   },
 
   searchInput: {
-    width: 260,
+    width: 220,
     borderRadius: 20,
     paddingLeft: WIDTH(4),
   },

@@ -25,7 +25,12 @@ const CategoryScreen = () => {
   const RenderItemFunction = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('subcategory', {catID: item?.id})}
+        onPress={() =>
+          navigation.navigate('subcategory', {
+            catID: item?.id,
+            catName: item?.category,
+          })
+        }
         style={styles.imgWrap}>
         <Image source={{uri: item?.icon}} style={styles.image} />
         <Text style={styles.name}>{item?.category}</Text>

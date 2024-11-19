@@ -10,6 +10,7 @@ import {Rating} from 'react-native-elements';
 import ApiManager from '../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
+import Snackbar from 'react-native-snackbar';
 
 const ReviewScreen = () => {
   const navigation = useNavigation();
@@ -48,25 +49,31 @@ const ReviewScreen = () => {
   const ReviewPostAPI = async () => {
     const params = {
       user_id: userIdd,
-      review: reviewHeadline,
       product_id: productId,
-      image: '',
+      heading: reviewHeadline,
+      description: reviewDesc,
       rating: rating,
     };
 
-    // navigation.navigate('productcartdetails');
-    // ApiManager.postProductReview(params)
-    //   .then(res => {
-    //     console.log('res?.data', res?.data);
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //   });
+    ApiManager.postProductReview(params)
+      .then(res => {
+        const message = res?.data?.message;
+        Snackbar.show({
+          text: message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: 'grey',
+          textColor: COLOR.White,
+        });
+        navigation.goBack();
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const PostReview = () => {
-    // ReviewPostAPI();
-    navigation.navigate('productcartdetails');
+    ReviewPostAPI();
+    // navigation.goBack();
   };
 
   return (
@@ -112,11 +119,10 @@ const ReviewScreen = () => {
           <Text style={styles.text}>Rating</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Rating
-              rating={rating}
-              onRatingChange={newRating => setRating(newRating)}
+              startingValue={rating}
+              onFinishRating={newRating => setRating(newRating)}
               showRating
-              // fractions={1}
-              startingValue={0}
+              minValue={1}
               imageSize={21}
               style={{paddingVertical: 10}}
             />

@@ -10,9 +10,9 @@ const ProductList = createSlice({
   reducers: {
     ProductListingFunction: (state, action) => {
       state.products.push({
-        product_id: action.payload.product_id,
-        quantity: action.payload.quantity,
-        price: action.payload.price,
+        id: action.payload.product_id,
+        quantity: action.payload.quantity || 1
+        // price: action.payload.price,
       });
     },
   },

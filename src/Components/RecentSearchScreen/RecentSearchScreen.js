@@ -4,13 +4,18 @@ import {useRoute} from '@react-navigation/native';
 
 const RecentSearchScreen = () => {
   const route = useRoute();
-  const filterproducts = route.params.filterProducts;
+  const filterproducts = route.params;
+
+  const handleRecentSearchClick = search => {
+    setQuery(search);
+    // onSearch(search); // Search with the selected recent search
+  };
 
   const ShowSearchItems = ({item}) => {
     return (
-      <View>
+      <TouchableOpacity onPress={() => handleRecentSearchClick(item)}>
         <Text>{item}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -18,7 +23,8 @@ const RecentSearchScreen = () => {
     <View>
       <FlatList
         data={filterproducts}
-        renderItem={({item}) => <ShowSearchItems item={item} />}
+        keyExtractor={item => item}
+        renderItem={({item}) => ShowSearchItems(item)}
       />
     </View>
   );

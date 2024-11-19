@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
 import {
@@ -35,10 +34,10 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const inputOnChange = text => {
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var isEmailValid = emailRegex.test(userName);
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    var isEmailValid = emailRegex.test(text);
     var phoneRegex = /^[6-9]\d{9}$/;
-    var isValidNumber = phoneRegex.test(userName);
+    var isValidNumber = phoneRegex.test(text);
 
     let validate = isEmailValid || isValidNumber;
     if (!validate) {
@@ -52,15 +51,30 @@ const Signup = () => {
   };
 
   const onPasswordChange = text => {
+    const passwordRegex =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const validConfirmPassword = passwordRegex.test(text);
+    if (!validConfirmPassword) {
+      setPasswordError(true);
+    } else {
+      setPasswordError(false);
+    }
     const formattedInpt = text.replace(/\s/g, '');
     setPassword(formattedInpt);
-    setPasswordError(false);
   };
 
   const onConfirmPasswordChange = text => {
+    const passwordRegex =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const validConfirmPassword = passwordRegex.test(text);
+    if (!validConfirmPassword) {
+      setConfirmPasswordError(true);
+    } else {
+      setConfirmPasswordError(false);
+    }
+
     const formattedInpt = text.replace(/\s/g, '');
     setConfirmPassword(formattedInpt);
-    setConfirmPasswordError(false);
   };
 
   const showPasswordFunction = () => {
@@ -75,50 +89,47 @@ const Signup = () => {
     const strongPassword = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])/;
     if (strongPassword.test(password) == false) {
       setPasswordError(true);
-    } else if (password.length < 8) {
-      // setpasswordError2(true);
     } else {
       setPasswordError(false);
-      // setpasswordError2(false);
     }
   };
 
   const SignUpFunction = () => {
-    // if (userName == '' || password == '' || confirmPassword == '') {
-    //   Snackbar.show({
-    //     text: 'Please enter all the fields',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    // } else if (userNameError) {
-    //   Snackbar.show({
-    //     text: 'Please enter valid Email or Phone Number',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    // } else if (!userNameError) {
-    //   if (password.length < 8) {
-    //     Snackbar.show({
-    //       text: 'Enter 8 digit Password',
-    //       backgroundColor: '#D1264A',
-    //       duration: Snackbar.LENGTH_SHORT,
-    //     });
-    //   } else if (confirmPassword.length == 0) {
-    //     Snackbar.show({
-    //       text: 'Enter confirm Password',
-    //       backgroundColor: '#D1264A',
-    //       duration: Snackbar.LENGTH_SHORT,
-    //     });
-    //   }
-    // } else if (password == confirmPassword) {
-    //   Snackbar.show({
-    //     text: 'Password not match',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    // } else if (!userNameError && !passwordError && !confirmPasswordError) {
-      signUpAPI();
-    // }
+    if (userName == '' || password == '' || confirmPassword == '') {
+      Snackbar.show({
+        text: 'Please enter all the fields',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } else if (userNameError) {
+      Snackbar.show({
+        text: 'Please enter valid Email or Phone Number',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } else if (!userNameError) {
+      if (password.length < 8) {
+        Snackbar.show({
+          text: 'Enter 8 digit Password',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else if (passwordError) {
+        Snackbar.show({
+          text: 'Password must contain character, digit and special character',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else if (password !== confirmPassword) {
+        Snackbar.show({
+          text: 'Password and Confirm Password does not match',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else {
+        signUpAPI();
+      }
+    }
   };
 
   const signUpAPI = () => {
@@ -127,15 +138,14 @@ const Signup = () => {
       user_password: password,
       confirm_password: confirmPassword,
     };
-    console.log('params', params);
-    
 
     ApiManager.userSignUp(params)
       .then(res => {
         // if (res?.data?.status == 200) {
-          const userData = JSON.stringify(res?.data);
-          AsyncStorage.setItem('userData', userData);
-          navigation.navigate('Dashboard');
+        const userData = JSON.stringify(res?.data);
+
+        AsyncStorage.setItem('userData', userData);
+        navigation.navigate('Dashboard');
         // } else {
         //   Snackbar.show({
         //     text: 'Please enter all the fields',
@@ -150,6 +160,9 @@ const Signup = () => {
   return (
     <View style={styles.container}>
       <View style={styles.logo}>
+        <TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
+          <Text style={styles.skipBtn}>Skip</Text>
+        </TouchableOpacity>
         <Text style={styles.signUpTxt}>SignUp</Text>
         <View>
           <Image
@@ -159,7 +172,7 @@ const Signup = () => {
         </View>
       </View>
 
-      <ScrollView style={{padding: WIDTH(4)}}>
+      <View style={{padding: WIDTH(4)}}>
         <View>
           <Text style={styles.subTitle}>Email / Mobile Number</Text>
           <View style={styles.inputView}>
@@ -191,8 +204,9 @@ const Signup = () => {
               placeholder="Enter password"
               placeholderTextColor={COLOR.Gray}
               value={password}
+              secureTextEntry={!showPassword}
               onChangeText={onPasswordChange}
-              // onBlur={validationFunction}
+              onBlur={validatePassword}
             />
             <Entypo
               name={showPassword ? 'eye' : 'eye-with-line'}
@@ -214,10 +228,11 @@ const Signup = () => {
               placeholder="Re-enter password"
               placeholderTextColor={COLOR.Gray}
               value={confirmPassword}
+              secureTextEntry={!showConfirmPassword}
               onChangeText={onConfirmPasswordChange}
             />
             <Entypo
-              name={confirmPasswordError ? 'eye' : 'eye-with-line'}
+              name={showConfirmPassword ? 'eye' : 'eye-with-line'}
               onPress={showConfirmPasswordFunction}
               size={20}
               color={COLOR.Black}
@@ -238,7 +253,7 @@ const Signup = () => {
             <Text style={styles.alreadyAccount}>Sign in</Text>
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -277,6 +292,14 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: HEIGHT(0.7),
     marginTop: HEIGHT(0.3),
+  },
+
+  skipBtn: {
+    position: 'absolute',
+    end: 15,
+    top: 10,
+    color: 'gray',
+    fontSize: 15,
   },
 
   InputField: {

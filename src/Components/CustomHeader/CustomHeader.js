@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
     fontFamily: Poppins_Medium,
     color: COLOR.Black,
     textAlign: 'center',
-    paddingLeft: WIDTH(32),
+    paddingLeft: WIDTH(28),
   },
 });

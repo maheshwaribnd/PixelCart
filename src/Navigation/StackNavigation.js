@@ -19,6 +19,7 @@ import RecentSearchScreen from '../Components/RecentSearchScreen/RecentSearchScr
 import EditProfile from '../Screens/MainScreens/Profile/EditProfile';
 import CheckoutScreen from '../Screens/Checkout/CheckoutScreen';
 import OrderListingScreen from '../Screens/OrderListingScreen/OrderListingScreen';
+import NotificationComp from '../Components/Notification/NotificationComp';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,7 @@ const StackNavigation = () => {
         <Stack.Screen name="Dashboard" component={BottomNavigation} />
         <Stack.Screen name="subcategory" component={SubCategory} />
         <Stack.Screen name="checkout" component={CheckoutScreen} />
+        <Stack.Screen name="notification" component={NotificationComp} />
         <Stack.Screen
           name="productcartdetails"
           component={ProductCartDetails}
@@ -45,7 +47,7 @@ const StackNavigation = () => {
         <Stack.Screen name="reviewscreen" component={ReviewScreen} />
         <Stack.Screen name="address" component={AddressScreen} />
         <Stack.Screen name="editprofile" component={EditProfile} />
-        <Stack.Screen name='orderlist' component={OrderListingScreen} />
+        <Stack.Screen name="orderlist" component={OrderListingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

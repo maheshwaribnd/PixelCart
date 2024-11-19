@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {styles} from './style';
 import COLOR from '../../../Config/color.json';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -14,9 +14,7 @@ import CustomHeader from '../../../Components/CustomHeader/CustomHeader';
 import DashedLine from 'react-native-dashed-line';
 import {HEIGHT, Poppins_Regular, WIDTH} from '../../../Config/appConst';
 import CustomBtn2 from '../../../Components/CustomBtn/CustomBtn2';
-import {CartDetailsArray} from '../../../Arrays/CartDetailsArray/CartDetailsArray';
 import {useNavigation} from '@react-navigation/native';
-import {Checkbox} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   addToCart,
@@ -24,11 +22,15 @@ import {
   removeToCart,
 } from '../../../Redux/Reducers/Cart';
 import {addTotalAmount} from '../../../Redux/Reducers/TotalAmount';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ApiManager from '../../../API/Api';
 
 const CartScreen = () => {
   const dispatch = useDispatch();
   const Cart = useSelector(state => state.Cart);
   const navigation = useNavigation();
+
+  const [listResponse, setListResponse] = useState([]);
   const [empty, setEmpty] = useState(true);
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -38,6 +40,29 @@ const CartScreen = () => {
   };
 
   const totalAmount = calculateTotal(Cart);
+
+  useEffect(() => {
+    ListMyOrderAPI();
+  }, []);
+
+  const ListMyOrderAPI = async () => {
+    const userDetails = await AsyncStorage.getItem('userData');
+    const user = JSON.parse(userDetails);
+    const userId = user?.customer_id;
+
+    const params = {
+      user_id: userId,
+    };
+
+    ApiManager.orderListing(params)
+      .then(res => {
+        const response = res?.data?.data?.orders;
+        setListResponse(response);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   const AddToCartFunction = item => {
     dispatch(addToCart(item));
@@ -67,8 +92,8 @@ const CartScreen = () => {
   };
 
   const AddItemsFunction = () => {
-    navigation.navigate('home')
-  }
+    navigation.navigate('home');
+  };
 
   const CartDetailsFunction = ({item}) => {
     return (
@@ -157,20 +182,22 @@ const CartScreen = () => {
                 {alignItems: 'center', gap: 6, marginVertical: HEIGHT(1)},
               ]}>
               <Image
-                source={item?.image}
+                source={require('../../../Images/CategoryImages/CategoryImg2.png')}
                 style={{height: HEIGHT(11), width: WIDTH(20), borderRadius: 16}}
               />
               <View>
                 <Text style={styles.name}>{item?.name}</Text>
                 <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
-                  {item?.desc}
+                  {item?.order_placed_at}
                 </Text>
               </View>
             </View>
 
             <TouchableOpacity
               style={styles.TrackBtn}
-              onPress={() => navigation.navigate('trackscreen')}>
+              onPress={() =>
+                navigation.navigate('trackscreen', {product: item})
+              }>
               <View
                 style={[
                   styles.alignStyle,
@@ -250,10 +277,14 @@ const CartScreen = () => {
               />
             ) : null}
 
-            <FlatList
-              data={CartDetailsArray}
-              renderItem={({item}) => <YourOrderFunction item={item} />}
-            />
+            {listResponse != [] ? (
+              <FlatList
+                data={listResponse}
+                renderItem={({item}) => <YourOrderFunction item={item} />}
+              />
+            ) : (
+              <Text style={{color: COLOR.Black}}>No Orders</Text>
+            )}
           </View>
         </View>
       </ScrollView>

@@ -1,4 +1,11 @@
-import {FlatList, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import COLOR from '../../Config/color.json';
 import {
@@ -28,13 +35,11 @@ const OrderListingScreen = () => {
     const params = {
       user_id: userId,
     };
-    console.log('params', params);
 
     ApiManager.orderListing(params)
       .then(res => {
-        console.log(res?.data?.data?.orders);
         const response = res?.data?.data?.orders;
-        // setListResponse(response)
+        setListResponse(response);
       })
       .catch(error => {
         console.log(error);
@@ -43,42 +48,16 @@ const OrderListingScreen = () => {
 
   const YourOrderFunction = ({item}) => {
     return (
-      <View>
-        <View
-          style={[
-            styles.alignStyle,
-            {alignItems: 'center', marginVertical: HEIGHT(1)},
-          ]}>
-          <View
-            style={[
-              styles.alignStyle,
-              {alignItems: 'center', gap: 6, marginVertical: HEIGHT(1)},
-            ]}>
-            <Image
-              source={item?.image}
-              style={{height: HEIGHT(11), width: WIDTH(20), borderRadius: 16}}
-            />
-            <View>
-              <Text style={styles.name}>{item?.name}</Text>
-              <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
-                {item?.desc}
-              </Text>
-            </View>
-          </View>
-
-          {/* <TouchableOpacity
-            style={styles.TrackBtn}
-            onPress={() => navigation.navigate('trackscreen')}>
-            <View
-              style={[
-                styles.alignStyle,
-                {justifyContent: 'center', alignItems: 'center'},
-              ]}>
-              <Text style={styles.trackBtnTxt}>Track</Text>
-              <AntDesign name="right" color="#008215" size={7} />
-              <AntDesign name="right" color="#008215" size={7} />
-            </View>
-          </TouchableOpacity> */}
+      <View style={styles.box}>
+        <Image
+          source={require('../../Images/CategoryImages/CategoryImg1.png')}
+          style={{height: HEIGHT(11), width: WIDTH(20), borderRadius: 16}}
+        />
+        <View>
+          <Text style={styles.name}>{item?.name}</Text>
+          <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
+            {item?.order_placed_at}
+          </Text>
         </View>
       </View>
     );
@@ -96,10 +75,17 @@ const OrderListingScreen = () => {
         style={styles.dashlineStyle}
       />
 
-      <FlatList
-        data={listResponse}
-        renderItem={({item}) => <YourOrderFunction item={item} />}
-      />
+      {listResponse != [] ? (
+        <View style={{paddingTop: HEIGHT(1), paddingBottom: HEIGHT(4)}}>
+          <FlatList
+            data={listResponse}
+            // key={item => item?.id}
+            renderItem={({item}) => <YourOrderFunction item={item} />}
+          />
+        </View>
+      ) : (
+        <Text style={styles.name}>No Orders Placed</Text>
+      )}
     </ScrollView>
   );
 };
@@ -107,9 +93,13 @@ const OrderListingScreen = () => {
 export default OrderListingScreen;
 
 const styles = StyleSheet.create({
-  alignStyle: {
+  box: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 16,
+    marginVertical: HEIGHT(1),
+    // paddingVertical: WIDTH(2),
   },
 
   title: {
@@ -160,5 +150,11 @@ const styles = StyleSheet.create({
     marginTop: HEIGHT(1),
     marginBottom: HEIGHT(1),
     marginVertical: WIDTH(3),
+  },
+
+  name: {
+    fontFamily: Inter_Regular,
+    fontSize: 16,
+    color: COLOR.Black,
   },
 });

@@ -3,6 +3,7 @@ import Cart from '../Reducers/Cart';
 import addAddress from '../Reducers/Address';
 import ProductListingFunction from '../Reducers/ProductList';
 import addTotalAmount from '../Reducers/TotalAmount';
+import UserDetails from '../Reducers/UserData';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     addAddress,
     ProductListingFunction,
     addTotalAmount,
+    UserDetails,
   },
 });
 

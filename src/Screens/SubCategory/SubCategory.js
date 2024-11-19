@@ -18,6 +18,7 @@ const SubCategory = () => {
   const [selectedItem, setSelectedItem] = useState([]);
 
   const categoryID = route?.params?.catID;
+  const categoryName = route?.params?.catName;
 
   useEffect(() => {
     CategoryListAPI();
@@ -120,7 +121,7 @@ const SubCategory = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name={selectedItem?.category} />
+      <CustomHeader name={categoryName} />
       <View style={{backgroundColor: '#fff'}}>
         <View style={styles.catListFlatlistView}>
           <FlatList

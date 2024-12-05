@@ -1,22 +1,40 @@
-import {StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import COLOR from '../../Config/color.json';
-import {HEIGHT, Poppins_Regular, WIDTH} from '../../Config/appConst';
-import OTPModalComponent from '../../Components/CustomModal/Modal';
+import {
+  HEIGHT,
+  Poppins_Medium,
+  Poppins_Regular,
+  WIDTH,
+} from '../../Config/appConst';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
-import CustomBtn from '../../Components/CustomBtn/CustomButton';
+import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
+import {useNavigation} from '@react-navigation/native';
+import ApiManager from '../../API/Api';
+import Snackbar from 'react-native-snackbar';
 
 const Forgot = () => {
-  const [currentOtp, setCurrentOtp] = useState(false);
+  const navigation = useNavigation();
+
+  const [sendOTP, setSendOTP] = useState(false);
   const [userName, setUserName] = useState('');
   const [isInvalidInput, setisInvalidInput] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [currentOTP, setCurrentOTP] = useState('');
+  const [storedOTP, setStoredOTP] = useState([]);
   const [error, setError] = useState(false);
 
   const inputOnChange = text => {
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var isEmailValid = emailRegex.test(inputValue);
+    var isEmailValid = emailRegex.test(userName);
     var phoneRegex = /^[6-9]\d{9}$/;
-    var isValidNumber = phoneRegex.test(inputValue);
+    var isValidNumber = phoneRegex.test(userName);
 
     let validate = isEmailValid || isValidNumber;
     if (!validate) {
@@ -31,24 +49,39 @@ const Forgot = () => {
   };
 
   const validationFunction = () => {
-    if (inputValue.length > 0 && isInvalidInput == true) {
+    if (userName.length > 0 && isInvalidInput == true) {
       setError(true);
     }
   };
 
-  const sendOTPFunction = () => {
-    setCurrentOtp(true);
+  const VerifyFunction = () => {
+    const params = {
+      users_email: userName,
+    };
+
+    ApiManager.forgotPassword(params)
+      .then(res => {
+        if (res?.data?.status == 200) {
+          navigation.navigate('newpassword');
+        } else {
+          Snackbar.show({
+            text: 'Please enter email',
+            backgroundColor: '#D1264A',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerStyle}>
-        <CustomHeader name="Forgot Password" />
-      </View>
-
+      <CustomHeader name="Forgot Password" />
       <View style={{padding: WIDTH(4)}}>
         <View style={{justifyContent: 'center'}}>
-          <Text style={styles.subTitle}>Email / Mobile Number</Text>
+          <Text style={styles.subTitle}>Enter Email</Text>
           <View>
             <TextInput
               style={styles.InputField}
@@ -61,12 +94,10 @@ const Forgot = () => {
           </View>
         </View>
 
-        <View>
-          <CustomBtn name="Send OTP" onPress={sendOTPFunction} />
+        <View style={{marginTop: HEIGHT(4)}}>
+          <CustomBtn1 name="Verify" onPress={() => VerifyFunction()} />
         </View>
       </View>
-
-      {currentOtp ? <OTPModalComponent /> : null}
     </View>
   );
 };
@@ -93,6 +124,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
+  forgotTxt: {
+    fontFamily: Poppins_Medium,
+    fontSize: 20,
+    marginTop: HEIGHT(1),
+    marginBottom: HEIGHT(3),
+  },
+
   subTitle: {
     fontFamily: Poppins_Regular,
     color: COLOR.Black,
@@ -103,12 +141,39 @@ const styles = StyleSheet.create({
     marginTop: HEIGHT(1),
     marginBottom: HEIGHT(2),
     paddingLeft: WIDTH(4),
-    height: HEIGHT(9),
+    height: 48,
     borderRadius: 12,
     fontSize: 14,
     borderWidth: 1,
     color: COLOR.Black,
     borderColor: COLOR.Gray,
     backgroundColor: COLOR.White,
+  },
+
+  subheadline: {
+    fontSize: 16,
+    color: COLOR.Gray,
+    fontFamily: Poppins_Medium,
+  },
+
+  verifyButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: WIDTH(85),
+    height: HEIGHT(7),
+    borderRadius: 8,
+    backgroundColor: COLOR.BtnColor,
+    color: COLOR.White,
+  },
+
+  modalWrap: {
+    padding: WIDTH(2),
+    alignItems: 'center',
+    backgroundColor: 'white',
+    width: WIDTH(92),
+    height: HEIGHT(32),
+    borderWidth: 1,
+    borderColor: COLOR.Gray,
+    borderRadius: 20,
   },
 });

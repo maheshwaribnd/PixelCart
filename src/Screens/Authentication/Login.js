@@ -4,99 +4,181 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Image,
+  ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
-import {HEIGHT, Poppins_Regular, WIDTH} from '../../Config/appConst';
+import {
+  HEIGHT,
+  Poppins_Medium,
+  Poppins_Regular,
+  WIDTH,
+} from '../../Config/appConst';
 import COLOR from '../../Config/color.json';
+import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
-import CustomBtn from '../../Components/CustomBtn/CustomButton';
+import CustomBtn1 from '../../Components/CustomBtn/CustomBtn1';
+import ApiManager from '../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Snackbar from 'react-native-snackbar';
 
 const Login = () => {
   const navigation = useNavigation();
 
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [isInvalidInput, setisInvalidInput] = useState(false);
-  const [error, setError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userNameError, setUserNameError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   const inputOnChange = text => {
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var isEmailValid = emailRegex.test(inputValue);
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    var isEmailValid = emailRegex.test(text);
     var phoneRegex = /^[6-9]\d{9}$/;
-    var isValidNumber = phoneRegex.test(inputValue);
+    var isValidNumber = phoneRegex.test(text);
 
     let validate = isEmailValid || isValidNumber;
+
     if (!validate) {
-      setisInvalidInput(true);
+      setUserNameError(true);
     } else {
-      setisInvalidInput(false);
+      setUserNameError(false);
     }
-    setUserName(userName);
-    setError(false);
+
     const formattedInpt = text.replace(/\s/g, '');
     setUserName(formattedInpt);
   };
 
   const validationFunction = () => {
-    if (inputValue.length > 0 && isInvalidInput == true) {
-      setError(true);
+    if (userName.length > 0 && setUserNameError == true) {
+      setUserNameError(true);
     }
   };
 
   const onPasswordChange = text => {
     const formattedInpt = text.replace(/\s/g, '');
     setPassword(formattedInpt);
+    setPasswordError(false);
+  };
+
+  const showPasswordFunction = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const signInFunction = () => {
+    if (userName == '' || password == '') {
+      Snackbar.show({
+        text: 'Please enter all the fields',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } else if (userNameError) {
+      Snackbar.show({
+        text: 'Please enter valid Email or Phone Number',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } else if (password.length > 0 && password.length < 8) {
+      Snackbar.show({
+        text: 'Please valid enter Password',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } else if (!userNameError && !passwordError) {
+      SignInAPI();
+      setUserName('');
+      setPassword('');
+    }
+  };
+
+  const SignInAPI = async () => {
+    const params = {
+      users_email_or_mobile: userName,
+      user_password: password,
+    };
+
+    await ApiManager.userLogin(params)
+      .then(async res => {
+        const userData = JSON.stringify(res?.data);
+        await AsyncStorage.setItem('userData', userData);
+        navigation.navigate('Dashboard');
+      })
+      .catch(error => console.log(error));
   };
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text style={styles.subTitle}>Email / Mobile Number</Text>
-        <View>
-          <TextInput
-            style={styles.InputField}
-            placeholder="Enter email or mobile no"
-            placeholderTextColor={COLOR.Gray}
-            value={userName}
-            onChangeText={inputOnChange}
-            onBlur={validationFunction}
-          />
-        </View>
-
-        <Text style={styles.subTitle}>Password</Text>
-        <View>
-          <TextInput
-            style={styles.InputField}
-            placeholder="Enter password"
-            placeholderTextColor={COLOR.Gray}
-            value={password}
-            onChangeText={onPasswordChange}
-          />
-        </View>
-      </View>
-
-      <View>
-        <CustomBtn name="Signin" />
-      </View>
-
-      <TouchableOpacity
-        onPress={() => navigation.navigate('forgot')}
-        style={{alignItems: 'center'}}>
-        <Text style={styles.forgot}>Forgot Password ?</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
+        <Text style={styles.skipBtn}>Skip</Text>
       </TouchableOpacity>
-
-      <View style={styles.orText}>
-        <Text style={{color: COLOR.Gray, fontSize: 16}}>--- Or ---</Text>
+      <View style={styles.logo}>
+        <Text style={styles.signInTxt}>SignIn</Text>
+        <View>
+          <Image
+            source={require('../../Images/randomImg/splash.png')}
+            style={{height: 135, width: 100}}
+          />
+        </View>
       </View>
 
-      <View style={{alignItems: 'center'}}>
-        <Text style={[styles.forgot, {color: COLOR.Black}]}>
-          Don't have an account?
+      <ScrollView style={{padding: WIDTH(4)}}>
+        <View>
+          <Text style={styles.subTitle}>Email / Mobile Number</Text>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.InputField}
+              placeholder="Enter email or mobile no"
+              placeholderTextColor={COLOR.Gray}
+              value={userName}
+              onChangeText={inputOnChange}
+              onBlur={validationFunction}
+            />
+          </View>
+
+          <Text style={styles.subTitle}>Password</Text>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.InputField}
+              placeholder="Enter password"
+              placeholderTextColor={COLOR.Gray}
+              value={password}
+              onChangeText={onPasswordChange}
+              secureTextEntry={!showPassword}
+            />
+
+            <Entypo
+              name={showPassword ? 'eye' : 'eye-with-line'}
+              onPress={showPasswordFunction}
+              size={20}
+              color={COLOR.Black}
+              style={{paddingRight: WIDTH(3)}}
+            />
+          </View>
+        </View>
+
+        <View style={{marginTop: HEIGHT(4)}}>
+          <CustomBtn1 name="Signin" onPress={() => signInFunction()} />
+        </View>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('forgot')}
+          style={{alignItems: 'center'}}>
+          <Text style={styles.forgot}>Forgot Password ?</Text>
+        </TouchableOpacity>
+
+        <View style={styles.orText}>
+          <Text style={{color: COLOR.Gray, fontSize: 16}}>--- Or ---</Text>
+        </View>
+
+        <View style={styles.accountText}>
+          <Text style={[styles.forgot, {color: COLOR.Black}]}>
+            Don't have an account?
+          </Text>
           <TouchableOpacity onPress={() => navigation.navigate('signup')}>
             <Text style={styles.forgot}>Register</Text>
           </TouchableOpacity>
-        </Text>
-      </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -106,8 +188,22 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: WIDTH(4),
     backgroundColor: COLOR.White,
+  },
+
+  signInTxt: {
+    fontFamily: Poppins_Medium,
+    fontSize: 25,
+    color: COLOR.backgroundColor,
+    textAlign: 'center',
+    marginVertical: HEIGHT(3),
+    marginHorizontal: WIDTH(4),
+  },
+
+  logo: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: WIDTH(75),
   },
 
   subTitle: {
@@ -117,16 +213,27 @@ const styles = StyleSheet.create({
   },
 
   InputField: {
+    paddingLeft: 12,
+    color: COLOR.Black,
+    width: WIDTH(80),
+  },
+
+  inputView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
     marginTop: HEIGHT(1),
     marginBottom: HEIGHT(2),
-    paddingLeft: WIDTH(4),
-    height: HEIGHT(9),
-    borderRadius: 12,
-    fontSize: 14,
-    borderWidth: 1,
-    color: COLOR.Black,
-    borderColor: COLOR.Gray,
-    backgroundColor: COLOR.White,
+  },
+
+  skipBtn: {
+    position: 'absolute',
+    end: 15,
+    top: 10,
+    color: 'gray',
+    fontSize: 15,
   },
 
   forgot: {
@@ -139,7 +246,14 @@ const styles = StyleSheet.create({
   orText: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: HEIGHT(5),
-    marginBottom: HEIGHT(3),
+    marginTop: HEIGHT(3),
+    marginBottom: HEIGHT(1),
+  },
+
+  accountText: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
   },
 });

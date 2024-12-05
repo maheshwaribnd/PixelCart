@@ -8,3 +8,22 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+
+-keepclassmembers class ** {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-keepattributes JavascriptInterface
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-dontwarn okhttp3.**
+-keep class okhttp3.** { *; }
+
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+
+-dontwarn com.google.gson.**
+-keep class com.google.gson.** { *; }

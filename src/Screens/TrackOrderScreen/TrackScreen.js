@@ -1,17 +1,54 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {Image, Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {styles} from './style';
 import CustomHeader from '../../Components/CustomHeader/CustomHeader';
-import {
-  HEIGHT,
-  Inter_Regular,
-  Poppins_Regular,
-  WIDTH,
-} from '../../Config/appConst';
 import COLOR from '../../Config/color.json';
-import CustomBtn from '../../Components/CustomBtn/CustomButton';
 import StepIndicator from 'react-native-step-indicator';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import CustomBtn2 from '../../Components/CustomBtn/CustomBtn2';
 
 const TrackScreen = () => {
+  const route = useRoute();
+  const Product = route?.params?.product;
+
+  const navigation = useNavigation();
+  const [currentPosition, setCurrentPosition] = useState(0);
+
+  const data = [
+    {
+      label: 'Ordered Add Approved',
+      status: 'Your order has been placed',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Packed',
+      status: 'Your order has been packed',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Shipped',
+      status: 'Your order has been shipped',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Out For Delivery',
+      status: 'Your item is Out For Delivery',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+
+    {
+      label: 'Delivered',
+      status: 'Your order has been delivered',
+      dateTime: 'Sat, 3rd Nov 11.49pm',
+    },
+    // 'Order Summary'
+    // 'Payment Method'
+    // 'Track'
+  ];
+
   const labels = [
     'Cart',
     'Delivery Address',
@@ -43,76 +80,48 @@ const TrackScreen = () => {
     currentStepLabelColor: '#fe7013',
   };
 
-  // constructor() {
-  //     this.state = {
-  //         currentPosition: 0
-  //     }
-  // }
-
   return (
-    <View>
+    <View style={{flex: 1}}>
       <CustomHeader name="Track Order" />
-      <View style={styles.container}>
-        <View style={styles.cartBox}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 12,
-              marginVertical: HEIGHT(1),
-            }}>
-            <Image
-              source={require('../../Images/FeatureList/featureImg1.png')}
-              style={{height: HEIGHT(11), width: WIDTH(20), borderRadius: 16}}
-            />
-            <View>
-              <Text style={styles.name}>Product Name</Text>
-              <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
-                abcde
-              </Text>
-            </View>
-          </View>
-
-          <StepIndicator
-            customStyles={customStyles}
-            // currentPosition={this.state.currentPosition}
-            labels={labels}
+      <View style={styles.cartBox}>
+        <View style={styles.viewBox}>
+          <Image
+            source={require('../../Images/FeatureList/featureImg1.png')}
+            style={styles.img}
           />
-          <CustomBtn name="Explore" />
-
+          <View>
+            <Text style={styles.name}>{Product?.name}</Text>
+            <Text style={[styles.name, {fontSize: 12, color: COLOR.Gray}]}>
+              {Product?.order_placed_at}
+            </Text>
+          </View>
         </View>
-        {/* <View style={{marginLeft: WIDTH(6.5)}}>
-          <CustomBtn name="Explore" />
-        </View> */}
+
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <StepIndicator
+            onPress={() => setCurrentPosition(currentPosition + 1)}
+            customStyles={customStyles}
+            currentPosition={currentPosition}
+            direction="vertical"
+            labels={labels}
+            renderLabel={({position, stepStatus, label, crntPosition}) => {
+              return (
+                <View>
+                  <Text>{data[position].label}</Text>
+                  <Text>{data[position].status}</Text>
+                  <Text>{data[position].dateTime}</Text>
+                </View>
+              );
+            }}
+          />
+        </View>
+        <CustomBtn2
+          name="Explore"
+          onPress={() => navigation.navigate('home')}
+        />
       </View>
     </View>
   );
 };
 
 export default TrackScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    // justifyContent: 'center',
-    //  alignItems: 'center',
-    //  padding: HEIGHT(2),
-    //  marginVertical: HEIGHT(3),
-    //  marginHorizontal: WIDTH(3),
-  },
-
-  cartBox: {
-    justifyContent: 'center',
-    // alignItems: 'center',
-    padding: HEIGHT(2),
-    marginVertical: HEIGHT(3),
-    marginHorizontal: WIDTH(3),
-    borderRadius: 16,
-    backgroundColor: COLOR.White,
-  },
-
-  name: {
-    fontFamily: Inter_Regular,
-    fontSize: 16,
-    color: COLOR.Black,
-  },
-});

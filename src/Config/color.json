@@ -1,6 +1,7 @@
 {
-    "Black": "#000",
-    "White": "#fff",
-    "BtnColor": "#503192",
-    "Gray": "#757575"
+  "Black": "#000",
+  "White": "#fff",
+  "BtnColor": "#503192",
+  "Gray": "#757575",
+  "BlueLightShade": "#F4F0FF"
 }

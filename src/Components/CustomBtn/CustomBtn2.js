@@ -3,7 +3,7 @@ import React from 'react';
 import { FONTSIZE, HEIGHT, Poppins_Medium, WIDTH } from '../../Config/appConst'
 import COLOR from '../../Config/color.json'
 
-const CustomBtn = ({ name, onPress }) => {
+const CustomBtn2 = ({ name, onPress }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.4}
@@ -14,13 +14,13 @@ const CustomBtn = ({ name, onPress }) => {
   );
 };
 
-export default CustomBtn;
+export default CustomBtn2;
 
 const styles = StyleSheet.create({
   button: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 310,
+    width: WIDTH(86),
     height: 48,
     borderRadius: 8,
     backgroundColor: COLOR.BtnColor,
